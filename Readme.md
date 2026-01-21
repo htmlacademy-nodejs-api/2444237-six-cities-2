@@ -1,7 +1,7 @@
 # Личный проект «Шесть городов»
 
-* Студент: [Владимир Бабич](https://up.htmlacademy.ru/nodejs-api-individual/2/user/2444237).
-* Наставник: `Неизвестно`.
+- Студент: [Владимир Бабич](https://up.htmlacademy.ru/nodejs-api-individual/2/user/2444237).
+- Наставник: [Глеб Алфутин](https://htmlacademy.ru/profile/id2668675).
 
 ---
 
