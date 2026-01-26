@@ -1,18 +1,18 @@
-import { readFileSync } from "node:fs";
-import { Amenity, City, HousingType, Offer } from "../../types/offer.js";
+import { readFileSync } from 'node:fs';
+import { Amenity, City, HousingType, Offer } from '../../types/offer.js';
 
 export class TSVFileReader {
-  private rawData = "";
+  private rawData = '';
 
   constructor(private readonly filePath: string) {}
 
   public read(): void {
-    this.rawData = readFileSync(this.filePath, "utf-8");
+    this.rawData = readFileSync(this.filePath, 'utf-8');
   }
 
   public toArray(): Offer[] {
     if (!this.rawData) {
-      throw new Error("No data. Call read() first.");
+      throw new Error('No data. Call read() first.');
     }
 
     return this.rawData
@@ -45,7 +45,7 @@ export class TSVFileReader {
           locationLat,
           locationLng,
           commentsCount,
-        ] = line.split("\t");
+        ] = line.split('\t');
 
         return {
           title: title,
@@ -53,22 +53,22 @@ export class TSVFileReader {
           date: new Date(postDate),
           city: city as City,
           imagePreview: previewImage,
-          images: images.split("|"),
-          isPremium: isPremium === "true",
-          isFavorite: isFavorite === "true",
+          images: images.split('|'),
+          isPremium: isPremium === 'true',
+          isFavorite: isFavorite === 'true',
           rating: Number(rating),
           type: type as HousingType,
           bedrooms: Number(bedrooms),
           maxAdults: Number(maxAdults),
           price: Number(price),
-          goods: goods.split("|").map((good) => good as Amenity),
+          goods: goods.split('|').map((good) => good as Amenity),
           host: {
             id: Number(hostId),
             name: hostName,
             email: hostEmail,
             avatar: hostAvatar,
             password: hostPassword,
-            isPro: hostIsPro === "true",
+            isPro: hostIsPro === 'true',
           },
           commentsCount: Number(commentsCount),
           location: {

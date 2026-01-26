@@ -1,10 +1,10 @@
-import { CommandParser } from "./command-parser.js";
-import { Command } from "./command.interfaсe.js";
+import { CommandParser } from './command-parser.js';
+import { Command } from './command.interfaсe.js';
 
 type CollectionCommand = Record<string, Command>;
 
 export class CliApplication {
-  constructor(private readonly defaultCommand: string = "--help") {}
+  constructor(private readonly defaultCommand: string = '--help') {}
   private commands: CollectionCommand = {};
 
   public registerCommands(commandList: Command[]) {
@@ -22,7 +22,7 @@ export class CliApplication {
 
   public getDefaultCommand(): Command {
     if (!this.defaultCommand) {
-      throw new Error("Default command is not defined");
+      throw new Error('Default command is not defined');
     }
     return this.commands[this.defaultCommand];
   }

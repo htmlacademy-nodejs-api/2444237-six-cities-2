@@ -1,13 +1,13 @@
-import { CliApplication } from "./cli/cli-application.js";
-import { Command } from "./cli/command.interfaсe.js";
-import { HelpCommand } from "./cli/help.command.js";
-import { ImportCommand } from "./cli/import.command.js";
-import { VersionCommand } from "./cli/version.command.js";
+import { CliApplication } from './cli/cli-application.js';
+import { Command } from './cli/command.interfaсe.js';
+import { HelpCommand } from './cli/help.command.js';
+import { ImportCommand } from './cli/import.command.js';
+import { VersionCommand } from './cli/version.command.js';
 
 const commands: Record<string, Command> = {
-  "--help": new HelpCommand(),
-  "--version": new VersionCommand(),
-  "--import": new ImportCommand(),
+  '--help': new HelpCommand(),
+  '--version': new VersionCommand(),
+  '--import': new ImportCommand(),
 };
 
 const bootstrap = () => {
