@@ -12,12 +12,13 @@
     "start": "npm run build && node ./dist/main.js",
     "build": "npm run clean && npm run compile",
     "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix",
     "compile": "tsc -p tsconfig.json",
     "clean": "rimraf dist",
     "ts": "ts-node"
   },
   "devDependencies": {
-    "@types/node": "18.17.17",
+    "@types/node": "^18.17.17",
     "@typescript-eslint/eslint-plugin": "6.7.0",
     "@typescript-eslint/parser": "6.7.0",
     "eslint": "8.49.0",
