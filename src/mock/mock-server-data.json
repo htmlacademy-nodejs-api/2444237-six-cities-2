@@ -1,0 +1,88 @@
+{
+  "api": {
+    "id": [1, 2, 3, 4, 5],
+    "title": [
+      "Cozy apartment",
+      "Luxury villa",
+      "Student room",
+      "Hotel suite",
+      "Family house"
+    ],
+    "description": [
+      "Уютная квартира в центре с прекрасным видом на город",
+      "Премиум вилла с бассейном и садом для больших компаний",
+      "Бюджетная комната для студентов рядом с университетом",
+      "Современный номер в отеле с видом на канал",
+      "Семейный дом в тихом районе с детской комнатой"
+    ],
+    "postDate": [
+      "2026-01-20",
+      "2026-01-18",
+      "2026-01-22",
+      "2026-01-15",
+      "2026-01-19"
+    ],
+    "city": ["Paris", "Amsterdam", "Cologne", "Brussels", "Hamburg"],
+    "previewImage": [
+      "https://example.com/preview1.jpg",
+      "https://example.com/preview2.jpg",
+      "https://example.com/preview3.jpg",
+      "https://example.com/preview4.jpg",
+      "https://example.com/preview5.jpg"
+    ],
+    "images": [
+      "https://example.com/img1.jpg|https://example.com/img2.jpg|https://example.com/img3.jpg|https://example.com/img4.jpg|https://example.com/img5.jpg|https://example.com/img6.jpg",
+      "https://example.com/img7.jpg|https://example.com/img8.jpg|https://example.com/img9.jpg|https://example.com/img10.jpg|https://example.com/img11.jpg|https://example.com/img12.jpg",
+      "https://example.com/img13.jpg|https://example.com/img14.jpg|https://example.com/img15.jpg|https://example.com/img16.jpg|https://example.com/img17.jpg|https://example.com/img18.jpg",
+      "https://example.com/img19.jpg|https://example.com/img20.jpg|https://example.com/img21.jpg|https://example.com/img22.jpg|https://example.com/img23.jpg|https://example.com/img24.jpg",
+      "https://example.com/img25.jpg|https://example.com/img26.jpg|https://example.com/img27.jpg|https://example.com/img28.jpg|https://example.com/img29.jpg|https://example.com/img30.jpg"
+    ],
+    "isPremium": [true, true, false, false, true],
+    "isFavorite": [false, true, false, true, false],
+    "rating": [4.7, 4.9, 3.8, 4.2, 4.5],
+    "type": ["apartment", "house", "room", "hotel", "house"],
+    "bedrooms": [2, 4, 1, 1, 3],
+    "maxAdults": [4, 8, 2, 3, 6],
+    "price": [5000, 25000, 1200, 8000, 15000],
+    "goods": [
+      "Breakfast|Air conditioning|Laptop friendly workspace",
+      "Breakfast|Washer|Towels|Fridge",
+      "Laptop friendly workspace",
+      "Air conditioning|Baby seat|Towels",
+      "Breakfast|Baby seat|Washer|Fridge"
+    ],
+    "hostId": [1, 2, 3, 4, 5],
+    "hostName": [
+      "John Doe",
+      "Maria Schmidt",
+      "Ahmed Ali",
+      "Emma Dubois",
+      "Sophie Müller"
+    ],
+    "hostEmail": [
+      "john@example.com",
+      "maria@example.com",
+      "ahmed@example.com",
+      "emma@example.com",
+      "sophie@example.com"
+    ],
+    "hostAvatar": [
+      "https://example.com/avatar1.jpg",
+      "https://example.com/avatar2.jpg",
+      "https://example.com/avatar3.jpg",
+      "https://example.com/avatar4.jpg",
+      "https://example.com/avatar5.jpg"
+    ],
+    "hostPassword": [
+      "john-password",
+      "maria-password",
+      "ahmed-password",
+      "emma-password",
+      "sophie-password"
+    ],
+    "hostIsPro": [true, false, true, true, false],
+    "locationLat": [48.8566, 52.3702, 50.9375, 50.8503, 53.5511],
+    "locationLng": [2.3522, 4.8952, 6.9603, 4.3517, 9.9937],
+    "commentsCount": [12, 8, 5, 23, 17]
+  }
+}

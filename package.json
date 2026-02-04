@@ -15,7 +15,8 @@
     "lint:fix": "eslint src/ --ext .ts --fix",
     "compile": "tsc -p tsconfig.json",
     "clean": "rimraf dist",
-    "ts": "ts-node"
+    "ts": "ts-node",
+    "mock:server": "json-server ./src/mock/mock-server-data.json --port 3123"
   },
   "devDependencies": {
     "@types/node": "^18.17.17",
@@ -23,13 +24,19 @@
     "@typescript-eslint/parser": "6.7.0",
     "eslint": "8.49.0",
     "eslint-config-htmlacademy": "9.1.1",
+    "json-server": "1.0.0-beta.5",
     "rimraf": "5.0.1",
     "ts-node": "10.9.1",
+    "tslib": "2.8.1",
     "typescript": "5.2.2"
   },
   "type": "module",
   "engines": {
     "node": "^18.0.0",
     "npm": ">=8"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.19",
+    "got": "^14.6.6"
   }
 }

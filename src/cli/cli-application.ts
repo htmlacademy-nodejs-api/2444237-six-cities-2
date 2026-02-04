@@ -34,7 +34,7 @@ export class CliApplication {
       command.execute();
       return;
     }
-    console.log(parsedArguments);
+
     const [commandName] = Object.keys(parsedArguments);
     const command = this.getCommand(commandName);
     const commandArguments = parsedArguments[commandName];
