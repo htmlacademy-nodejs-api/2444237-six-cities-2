@@ -4,16 +4,16 @@ import {
   modelOptions,
   prop,
   Ref,
-} from "@typegoose/typegoose";
-import { UserEntity } from "../user/index.js";
-import { OfferEntity } from "../offer/offer.entity.js";
+} from '@typegoose/typegoose';
+import { UserEntity } from '../user/index.js';
+import { OfferEntity } from '../offer/offer.entity.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface CommentEntity extends defaultClasses.Base {}
 
 @modelOptions({
   schemaOptions: {
-    collection: "comments",
+    collection: 'comments',
     timestamps: true,
   },
 })

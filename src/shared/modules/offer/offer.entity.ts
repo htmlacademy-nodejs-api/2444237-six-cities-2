@@ -4,16 +4,16 @@ import {
   modelOptions,
   prop,
   Ref,
-} from "@typegoose/typegoose";
-import { Amenity, City, HousingType } from "../../types/offer.js";
-import { UserEntity } from "../user/user.entity.js";
+} from '@typegoose/typegoose';
+import { Amenity, City, HousingType } from '../../types/offer.js';
+import { UserEntity } from '../user/user.entity.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface OfferEntity extends defaultClasses.Base {}
 
 @modelOptions({
   schemaOptions: {
-    collection: "offers",
+    collection: 'offers',
     timestamps: true,
   },
 })
@@ -46,12 +46,12 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({
     required: true,
     enum: [
-      "Paris",
-      "Cologne",
-      "Brussels",
-      "Amsterdam",
-      "Hamburg",
-      "Dusseldorf",
+      'Paris',
+      'Cologne',
+      'Brussels',
+      'Amsterdam',
+      'Hamburg',
+      'Dusseldorf',
     ],
   })
   public city!: City;
@@ -71,7 +71,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ required: true, min: 0, max: 5 })
   public rating!: number;
 
-  @prop({ required: true, enum: ["apartment", "house", "room", "hotel"] })
+  @prop({ required: true, enum: ['apartment', 'house', 'room', 'hotel'] })
   public type!: HousingType;
 
   @prop({ required: true, min: 1, max: 8 })
@@ -87,13 +87,13 @@ export class OfferEntity extends defaultClasses.TimeStamps {
     type: () => [String],
     required: true,
     enum: [
-      "Breakfast",
-      "Air conditioning",
-      "Laptop friendly workspace",
-      "Baby seat",
-      "Washer",
-      "Towels",
-      "Towels",
+      'Breakfast',
+      'Air conditioning',
+      'Laptop friendly workspace',
+      'Baby seat',
+      'Washer',
+      'Towels',
+      'Towels',
     ],
   })
   public goods!: Amenity[];

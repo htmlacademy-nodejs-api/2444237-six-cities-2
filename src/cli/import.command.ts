@@ -1,21 +1,21 @@
-import { ModelType } from "@typegoose/typegoose/lib/types.js";
-import { getErrorMessage } from "../shared/helpers/common.js";
-import { getMongoUri } from "../shared/helpers/database-client.js";
-import { createOffer } from "../shared/helpers/offer.js";
+import { ModelType } from '@typegoose/typegoose/lib/types.js';
+import { getErrorMessage } from '../shared/helpers/common.js';
+import { getMongoUri } from '../shared/helpers/database-client.js';
+import { createOffer } from '../shared/helpers/offer.js';
 import {
   DatabaseClient,
   MongoDatabaseClient,
-} from "../shared/libs/database-client/index.js";
-import { TSVFileReader } from "../shared/libs/file-reader/tsv-file-reader.js";
-import { ConsoleLogger } from "../shared/libs/logger/console.logger.js";
-import { OfferService } from "../shared/modules/offer/offer-service.js";
-import { UserService } from "../shared/modules/user/user-service.js";
-import { Offer } from "../shared/types/offer.js";
-import { Command } from "./command.interfaсe.js";
-import { DEFAULT_DB_PORT, DEFAULT_USER_PASSWORD } from "./const.cli.js";
-import { OfferEntity } from "../shared/modules/offer/offer.entity.js";
-import { UserEntity } from "../shared/modules/user/user.entity.js";
-import { CommentEntity } from "../shared/modules/comment/comment.entity.js";
+} from '../shared/libs/database-client/index.js';
+import { TSVFileReader } from '../shared/libs/file-reader/tsv-file-reader.js';
+import { ConsoleLogger } from '../shared/libs/logger/console.logger.js';
+import { OfferService } from '../shared/modules/offer/offer-service.js';
+import { UserService } from '../shared/modules/user/user-service.js';
+import { Offer } from '../shared/types/offer.js';
+import { Command } from './command.interfaсe.js';
+import { DEFAULT_DB_PORT, DEFAULT_USER_PASSWORD } from './const.cli.js';
+import { OfferEntity } from '../shared/modules/offer/offer.entity.js';
+import { UserEntity } from '../shared/modules/user/user.entity.js';
+import { CommentEntity } from '../shared/modules/comment/comment.entity.js';
 
 export class ImportCommand implements Command {
   private salt: string;
@@ -39,7 +39,7 @@ export class ImportCommand implements Command {
   }
 
   public getName(): string {
-    return "--import";
+    return '--import';
   }
 
   private async onImportedLine(line: string, resolve: () => void) {
@@ -76,8 +76,8 @@ export class ImportCommand implements Command {
 
     const fileReader = new TSVFileReader(filename.trim());
 
-    fileReader.on("line", this.onImportedLine.bind(this));
-    fileReader.on("end", this.onCompletedImport.bind(this));
+    fileReader.on('line', this.onImportedLine.bind(this));
+    fileReader.on('end', this.onCompletedImport.bind(this));
 
     try {
       await fileReader.read();
