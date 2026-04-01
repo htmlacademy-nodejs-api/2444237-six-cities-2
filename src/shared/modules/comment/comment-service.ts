@@ -1,11 +1,11 @@
-import { inject, injectable } from "inversify";
-import { CommentServiceInterface } from "./comment-service.interface.js";
-import { Logger } from "../../libs/logger/index.js";
-import { Component } from "../../types/container.js";
-import { CommentDto } from "./dto/comment-dto.js";
-import { CommentEntity } from "./comment.entity.js";
-import { DocumentType, types } from "@typegoose/typegoose";
-import { OfferServiceInterface } from "../offer/offer-service.interface.js";
+import { inject, injectable } from 'inversify';
+import { CommentServiceInterface } from './comment-service.interface.js';
+import { Logger } from '../../libs/logger/index.js';
+import { Component } from '../../types/container.js';
+import { CommentDto } from './dto/comment-dto.js';
+import { CommentEntity } from './comment.entity.js';
+import { DocumentType, types } from '@typegoose/typegoose';
+import { OfferServiceInterface } from '../offer/offer-service.interface.js';
 
 @injectable()
 export class CommentService implements CommentServiceInterface {
@@ -25,13 +25,13 @@ export class CommentService implements CommentServiceInterface {
 
     await this.offerService.recalcRating(dto.offerId);
 
-    return result.populate("author");
+    return result.populate('author');
   }
 
   public async findByOfferId(
     offerId: string,
   ): Promise<DocumentType<CommentEntity>[]> {
-    return this.commentModel.find({ offerId }).populate("author");
+    return this.commentModel.find({ offerId }).populate('author');
   }
 
   public async deleteByOfferId(offerId: string): Promise<number> {
