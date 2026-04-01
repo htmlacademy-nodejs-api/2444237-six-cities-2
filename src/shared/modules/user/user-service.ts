@@ -5,14 +5,19 @@ import { UserEntity, UserModel } from './user.entity.js';
 import { inject, injectable } from 'inversify';
 import { Component } from '../../types/container.js';
 import { Logger } from '../../libs/logger/index.js';
+import { OfferEntity } from '../offer/offer.entity.js';
 
 @injectable()
 export class UserService implements UserServiceInterface {
   constructor(
-    @inject(Component.Logger) private readonly logger: Logger
+    @inject(Component.Logger) private readonly logger: Logger,
+    @inject(Component.UserModel) private readonly userModel: typeof UserModel,
   ) {}
 
-  async register(dto: CreateUserDto, salt: string): Promise<DocumentType<UserEntity>> {
+  async register(
+    dto: CreateUserDto,
+    salt: string,
+  ): Promise<DocumentType<UserEntity>> {
     const user = new UserEntity(dto);
     user.setPassword(dto.password, salt);
 
@@ -23,14 +28,35 @@ export class UserService implements UserServiceInterface {
   }
 
   async findByEmail(email: string): Promise<DocumentType<UserEntity> | null> {
-    const result = await UserModel.findOne({ email });
-    this.logger.info(`Find user by email: ${email}`);
-    return result;
+    return this.userModel.findOne({ email }).exec();
   }
 
   async findById(id: number): Promise<DocumentType<UserEntity> | null> {
-    const result = await UserModel.findById(id);
-    this.logger.info(`Find user by id: ${id}`);
-    return result;
+    return this.userModel.findById(id).exec();
+  }
+
+  async findFavoriteOffers(
+    userId: number,
+  ): Promise<DocumentType<OfferEntity>[]> {
+    const user = await UserModel.findById(userId).populate('favorites').exec();
+
+    return (user?.favorites as DocumentType<OfferEntity>[]) ?? [];
+  }
+
+  async toggleFavoriteOffer(offerId: string, userId: number): Promise<void> {
+    const user = await UserModel.findById(userId).populate('favorites').exec();
+    if (!user) {
+      return;
+    }
+
+    if (user.favorites.find((offer) => offer._id.toString() === offerId)) {
+      await UserModel.findByIdAndUpdate(userId, {
+        $pull: { favorites: offerId },
+      });
+    } else {
+      await UserModel.findByIdAndUpdate(userId, {
+        $push: { favorites: offerId },
+      });
+    }
   }
 }
