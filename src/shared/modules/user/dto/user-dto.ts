@@ -5,3 +5,8 @@ export class CreateUserDto {
   public password: string;
   public isPro: boolean;
 }
+
+export class LoginUserDTO {
+  public email: string;
+  public password: string;
+}
