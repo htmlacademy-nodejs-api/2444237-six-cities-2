@@ -34,6 +34,12 @@ export class UserController extends BaseController {
       handler: this.auth,
       middlewares: [new ValidateDTOMiddleware(LoginUserDTO)],
     });
+
+    this.addRoute({
+      path: '/:userId/avatar',
+      method: HttpMethod.Post,
+      handler: this.uploadAvatar,
+    });
   }
 
   public async create(req: Request, res: Response) {
@@ -68,5 +74,11 @@ export class UserController extends BaseController {
       'Not implemented',
       'UserController',
     );
+  }
+
+  public uploadAvatar(req: Request, res: Response) {
+    this.created(res, {
+      file: req.file?.path,
+    });
   }
 }

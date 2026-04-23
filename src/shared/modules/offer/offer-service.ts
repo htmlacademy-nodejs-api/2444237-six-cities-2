@@ -8,9 +8,10 @@ import { City, UpdateOfferDto } from './dto/update-dto.js';
 import { DocumentType, types } from '@typegoose/typegoose';
 import { CommentEntity } from '../comment/comment.entity.js';
 import { Types } from 'mongoose';
+import { DocumentExists } from '../../libs/rest/types/document-exists.interface.js';
 
 @injectable()
-export class OfferService implements OfferServiceInterface {
+export class OfferService implements OfferServiceInterface, DocumentExists {
   constructor(
     @inject(Component.Logger) private readonly logger: Logger,
     @inject(Component.OfferModel)
@@ -27,6 +28,11 @@ export class OfferService implements OfferServiceInterface {
 
   async findOfferById(id: string): Promise<DocumentType<OfferEntity> | null> {
     return this.offerModel.findById(id).populate('host').exec();
+  }
+
+  async exists(documentId: string): Promise<boolean> {
+    const result = await this.offerModel.exists({ _id: documentId }).exec();
+    return !!result;
   }
 
   async updateById(

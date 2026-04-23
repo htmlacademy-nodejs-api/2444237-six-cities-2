@@ -7,6 +7,8 @@
 .idea/*
 .env
 
+/upload/
+
 .DS_Store
 coverage
 *.log
