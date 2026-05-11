@@ -13,6 +13,7 @@ import { HttpError } from '../../libs/rest/errors/http-error.js';
 import { ValidateDTOMiddleware } from '../../libs/rest/middleware/validate-object.middleware.js';
 import { CreateUserDto, LoginUserDTO } from './dto/user-dto.js';
 import { AuthServiceInterface, UserNotFoundException } from '../auth/index.js';
+import { PrivateRouteMiddleware } from '../../libs/rest/middleware/private-route.middleware.js';
 
 export class UserController extends BaseController {
   constructor(
@@ -48,6 +49,7 @@ export class UserController extends BaseController {
       path: '/login',
       method: HttpMethod.Get,
       handler: this.checkAuthenticate,
+      middlewares: [new PrivateRouteMiddleware()],
     });
   }
 

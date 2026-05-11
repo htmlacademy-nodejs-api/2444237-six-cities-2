@@ -29,28 +29,33 @@ export class ParseTokenMiddleware implements Middleware {
   ): Promise<void> {
     const authorizationHeader = req.headers?.authorization?.split(' ');
 
-    if (!authorizationHeader) {
+    if (
+      !authorizationHeader ||
+      authorizationHeader?.[0] !== 'Bearer' ||
+      !authorizationHeader?.[1]
+    ) {
       return next();
     }
 
     const [, token] = authorizationHeader;
+    try {
+      const { payload } = await jwtVerify(
+        token,
+        crypto.createSecretKey(this.jwtSecret, 'utf-8'),
+      );
 
-    const { payload } = await jwtVerify(
-      token,
-      crypto.createSecretKey(this.jwtSecret, 'utf-8'),
-    );
-
-    if (isTokenPayload(payload)) {
-      req.tokenPayload = { ...payload };
+      if (isTokenPayload(payload)) {
+        req.tokenPayload = { ...payload };
+      }
       return next();
+    } catch (err) {
+      return next(
+        new HttpError(
+          StatusCodes.UNAUTHORIZED,
+          'Invalid token',
+          'AuthenticateMiddleware',
+        ),
+      );
     }
-
-    return next(
-      new HttpError(
-        StatusCodes.UNAUTHORIZED,
-        'Invalid token',
-        'AuthenticateMiddleware',
-      ),
-    );
   }
 }
