@@ -10,6 +10,7 @@ export type RestSchema = {
   DB_PORT: string;
   DB_NAME: string;
   UPLOAD_FILE_DIRECTORY: string;
+  JWT_SECRET: string;
 };
 
 convict.addFormats(validator);
@@ -61,6 +62,12 @@ export const restSchema = convict<RestSchema>({
     doc: 'Upload file directory',
     format: String,
     env: 'UPLOAD_FILE_DIRECTORY',
+    default: null,
+  },
+  JWT_SECRET: {
+    doc: 'JWT secret',
+    format: String,
+    env: 'JWT_SECRET',
     default: null,
   },
 });

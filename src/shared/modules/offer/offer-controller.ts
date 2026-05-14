@@ -16,6 +16,8 @@ import { CreateOfferDto } from './dto/offer-dto.js';
 import { UpdateOfferDto } from './dto/update-dto.js';
 import { DocumentExistsMiddleware } from '../../libs/rest/middleware/document-exists.middleware.js';
 import { DocumentExists } from '../../libs/rest/types/document-exists.interface.js';
+import { PrivateRouteMiddleware } from '../../libs/rest/middleware/private-route.middleware.js';
+import { UserServiceInterface } from '../user/user-service.interface.js';
 
 export class OfferController extends BaseController {
   constructor(
@@ -24,6 +26,8 @@ export class OfferController extends BaseController {
     private readonly offerService: OfferServiceInterface & DocumentExists,
     @inject(Component.CommentService)
     private readonly commentService: CommentServiceInterface,
+    @inject(Component.UserService)
+    private readonly userService: UserServiceInterface,
   ) {
     super(logger);
 
@@ -32,13 +36,17 @@ export class OfferController extends BaseController {
       path: '/',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateDTOMiddleware(CreateOfferDto)],
+      middlewares: [
+        new PrivateRouteMiddleware(),
+        new ValidateDTOMiddleware(CreateOfferDto),
+      ],
     });
     this.addRoute({
       path: '/:offerId',
       method: HttpMethod.Put,
       handler: this.update,
       middlewares: [
+        new PrivateRouteMiddleware(),
         new ValidateObjectIdMiddleware('offerId'),
         new ValidateDTOMiddleware(UpdateOfferDto),
         new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
@@ -49,6 +57,7 @@ export class OfferController extends BaseController {
       method: HttpMethod.Delete,
       handler: this.delete,
       middlewares: [
+        new PrivateRouteMiddleware(),
         new ValidateObjectIdMiddleware('offerId'),
         new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
       ],
@@ -65,9 +74,20 @@ export class OfferController extends BaseController {
   }
 
   public async index(req: Request, res: Response) {
-    console.log(req.body);
     const offers = await this.offerService.find();
-    const responseData = fillDTO(OfferRDO, offers);
+    let favoritesIds: string[] = [];
+
+    if (req.tokenPayload) {
+      const user = await this.userService.findById(req.tokenPayload.id);
+      favoritesIds =
+        user?.favorites.map((offer) => offer.toString()) ?? ([] as string[]);
+    }
+
+    const offersWithStatus = offers.map((offer) => ({
+      ...offer.toObject(),
+      isFavorite: favoritesIds.includes(offer.id),
+    }));
+    const responseData = fillDTO(OfferRDO, offersWithStatus);
     this.ok(res, responseData);
   }
 
@@ -83,7 +103,10 @@ export class OfferController extends BaseController {
       return this.logger.error(error.message, error);
     }
 
-    const result = await this.offerService.createOffer(req.body);
+    const result = await this.offerService.createOffer({
+      ...req.body,
+      userId: req.tokenPayload.id,
+    });
     this.created(res, fillDTO(OfferRDO, result));
   }
 

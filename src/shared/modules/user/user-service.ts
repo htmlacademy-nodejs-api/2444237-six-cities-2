@@ -31,7 +31,7 @@ export class UserService implements UserServiceInterface {
     return this.userModel.findOne({ email }).exec();
   }
 
-  async findById(id: number): Promise<DocumentType<UserEntity> | null> {
+  async findById(id: string): Promise<DocumentType<UserEntity> | null> {
     return this.userModel.findById(id).exec();
   }
 

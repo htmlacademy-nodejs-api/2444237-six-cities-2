@@ -9,6 +9,7 @@ import { Request, Response } from 'express';
 import { CommentRDO } from './rdo/comment-rdo.js';
 import { CommentDto } from './dto/comment-dto.js';
 import { ValidateDTOMiddleware } from '../../libs/rest/middleware/validate-object.middleware.js';
+import { PrivateRouteMiddleware } from '../../libs/rest/middleware/private-route.middleware.js';
 
 export class CommentController extends BaseController {
   constructor(
@@ -22,7 +23,10 @@ export class CommentController extends BaseController {
       path: '/',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateDTOMiddleware(CommentDto)],
+      middlewares: [
+        new ValidateDTOMiddleware(CommentDto),
+        new PrivateRouteMiddleware(),
+      ],
     });
   }
 

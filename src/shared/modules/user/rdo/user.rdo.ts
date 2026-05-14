@@ -16,3 +16,11 @@ export class UserRDO {
   @Expose()
     favorites: string[];
 }
+
+export class LoggedUserRDO {
+  @Expose()
+  public email: string;
+
+  @Expose()
+  public token: string;
+}
