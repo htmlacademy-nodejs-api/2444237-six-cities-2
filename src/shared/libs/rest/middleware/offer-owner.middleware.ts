@@ -1,8 +1,8 @@
-import { Middleware } from "./middleware.interface.js";
-import { OfferServiceInterface } from "../../../modules/offer/offer-service.interface.js";
-import { Request, Response, NextFunction } from "express";
-import { StatusCodes } from "http-status-codes";
-import { HttpError } from "../errors/index.js";
+import { Middleware } from './middleware.interface.js';
+import { OfferServiceInterface } from '../../../modules/offer/offer-service.interface.js';
+import { Request, Response, NextFunction } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import { HttpError } from '../errors/index.js';
 
 export class IsOfferOwnerMiddleware implements Middleware {
   constructor(private readonly service: OfferServiceInterface) {}
@@ -21,8 +21,8 @@ export class IsOfferOwnerMiddleware implements Middleware {
       return next(
         new HttpError(
           StatusCodes.NOT_FOUND,
-          "Offer not found",
-          "IsOfferOwnerMiddleware",
+          'Offer not found',
+          'IsOfferOwnerMiddleware',
         ),
       );
     }
@@ -31,8 +31,8 @@ export class IsOfferOwnerMiddleware implements Middleware {
       return next(
         new HttpError(
           StatusCodes.UNAUTHORIZED,
-          "Unauthorized",
-          "IsOfferOwnerMiddleware",
+          'Unauthorized',
+          'IsOfferOwnerMiddleware',
         ),
       );
     }
@@ -41,8 +41,8 @@ export class IsOfferOwnerMiddleware implements Middleware {
       return next(
         new HttpError(
           StatusCodes.FORBIDDEN,
-          "You are not the owner of this offer",
-          "IsOfferOwnerMiddleware",
+          'You are not the owner of this offer',
+          'IsOfferOwnerMiddleware',
         ),
       );
     }
