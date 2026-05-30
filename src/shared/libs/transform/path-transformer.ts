@@ -4,7 +4,9 @@ import { Component } from '../../types/container.js';
 import { Config, RestSchema } from '../config/index.js';
 import {
   DEFAULT_STATIC_IMAGES,
+  STATIC_PATH,
   STATIC_RESOURCE_FIELDS,
+  UPLOAD_PATH,
 } from './transformer.const.js';
 import { getFullServerPath } from '../../helpers/common.js';
 
@@ -43,13 +45,11 @@ export class PathTransformer {
           }
 
           if (this.isStaticProperty(key) && typeof value === 'string') {
-            const staticPath = '/static';
-            const uploadPath = '/upload';
             const serverHost = this.config.get('HOST');
             const serverPort = this.config.get('PORT');
             const rootPath = this.hasDefaultImage(value)
-              ? staticPath
-              : uploadPath;
+              ? STATIC_PATH
+              : UPLOAD_PATH;
             current[key] =
               `${getFullServerPath(serverHost, serverPort)}${rootPath}/${value}`;
           }

@@ -48,8 +48,7 @@ export class ImportCommand implements Command {
     resolve();
   }
 
-  private onCompletedImport(count: number) {
-    console.log(`Imported ${count} offers`);
+  private onCompletedImport() {
     this.databaseClient.disconnect();
   }
 

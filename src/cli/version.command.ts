@@ -6,12 +6,11 @@ type PackageJsonConfig = {
   version: string;
 };
 
-const isPackageJsonConfig = (value: unknown): value is PackageJsonConfig => (
+const isPackageJsonConfig = (value: unknown): value is PackageJsonConfig =>
   typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    Object.hasOwn(value, 'version')
-);
+  value !== null &&
+  !Array.isArray(value) &&
+  Object.hasOwn(value, 'version');
 
 export class VersionCommand implements Command {
   constructor(private filePath: string = './package.json') {}
