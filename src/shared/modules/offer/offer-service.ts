@@ -75,7 +75,6 @@ export class OfferService implements OfferServiceInterface, DocumentExists {
       .find({ city, isPremium: true })
       .sort({ date: -1 })
       .limit(DISPLAY_PREMIUM_OFFERS_COUNT)
-      .populate('host')
       .exec();
   }
 

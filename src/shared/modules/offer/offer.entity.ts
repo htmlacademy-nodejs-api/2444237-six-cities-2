@@ -89,7 +89,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
       'Baby seat',
       'Washer',
       'Towels',
-      'Towels',
+      'Fridge',
     ],
   })
   public goods!: Amenity[];

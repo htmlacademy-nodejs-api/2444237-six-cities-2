@@ -32,6 +32,7 @@ export type Amenity =
   | 'Fridge';
 
 export interface Offer {
+  id: string;
   title: string;
   description: string;
   date: Date;

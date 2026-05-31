@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { jwtVerify } from 'jose';
 import { HttpError } from '../errors/index.js';
 import { StatusCodes } from 'http-status-codes';
-import { TokenPayload } from '../../../modules/auth/types/TokenPayload.js';
+import { TokenPayload } from '../../../modules/auth/types/token-payload.js';
 
 function isTokenPayload(payload: unknown): payload is TokenPayload {
   return (
@@ -27,17 +27,17 @@ export class ParseTokenMiddleware implements Middleware {
     _res: Response,
     next: NextFunction,
   ): Promise<void> {
-    const authorizationHeader = req.headers?.authorization?.split(' ');
+    const authorizationHeaders = req.headers?.authorization?.split(' ');
 
     if (
-      !authorizationHeader ||
-      authorizationHeader?.[0] !== 'Bearer' ||
-      !authorizationHeader?.[1]
+      !authorizationHeaders ||
+      authorizationHeaders?.[0] !== 'Bearer' ||
+      !authorizationHeaders?.[1]
     ) {
       return next();
     }
 
-    const [, token] = authorizationHeader;
+    const [, token] = authorizationHeaders;
     try {
       const { payload } = await jwtVerify(
         token,

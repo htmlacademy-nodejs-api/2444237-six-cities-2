@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { CliApplication } from './cli/cli-application.js';
-import { Command } from './cli/command.interfaсe.js';
+import { Command } from './cli/command.interface.js';
 import { GenerateCommand } from './cli/generate.command.js';
 import { HelpCommand } from './cli/help.command.js';
 import { ImportCommand } from './cli/import.command.js';

@@ -32,23 +32,8 @@ export class OfferRDO {
     type: string;
 
   @Expose()
-    bedrooms: number;
-
-  @Expose()
-    maxAdults: number;
-
-  @Expose()
     price: number;
 
   @Expose()
-    goods: string[];
-
-  @Expose()
-    host: string;
-
-  @Expose()
     commentsCount: number;
-
-  @Expose()
-    location: { latitude: number; longitude: number };
 }

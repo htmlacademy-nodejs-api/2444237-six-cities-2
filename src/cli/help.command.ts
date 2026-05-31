@@ -1,4 +1,4 @@
-import { Command } from './command.interfaсe.js';
+import { Command } from './command.interface.js';
 
 export class HelpCommand implements Command {
   getName(): string {

@@ -4,14 +4,15 @@ import { Logger } from './logger.interface.js';
 import { Logger as PinoInstance, pino, transport } from 'pino';
 import { injectable } from 'inversify';
 
+const LOG_FILE_PATH = 'logs/rest.log';
+
 @injectable()
 export class PinoLogger implements Logger {
   private readonly logger: PinoInstance;
 
   constructor() {
     const modulePath = getCurrentModulePath();
-    const logFilePath = 'logs/rest.log';
-    const destination = resolve(modulePath,'../../../', logFilePath);
+    const destination = resolve(modulePath, '../../../', LOG_FILE_PATH);
 
     const multiTransport = transport({
       targets: [
@@ -23,7 +24,7 @@ export class PinoLogger implements Logger {
         },
         {
           target: 'pino-pretty',
-        }
+        },
       ],
     });
 
@@ -31,18 +32,18 @@ export class PinoLogger implements Logger {
   }
 
   info(message: string, ...args: unknown[]): void {
-    this.logger.info({meta: args}, message);
+    this.logger.info({ meta: args }, message);
   }
 
   debug(message: string, ...args: unknown[]): void {
-    this.logger.debug({meta: args}, message);
+    this.logger.debug({ meta: args }, message);
   }
 
   warn(message: string, ...args: unknown[]): void {
-    this.logger.warn({meta: args}, message);
+    this.logger.warn({ meta: args }, message);
   }
 
   error(message: string, ...args: unknown[]): void {
-    this.logger.error({meta: args}, message);
+    this.logger.error({ meta: args }, message);
   }
 }

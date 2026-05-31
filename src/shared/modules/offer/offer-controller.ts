@@ -20,6 +20,7 @@ import { PrivateRouteMiddleware } from '../../libs/rest/middleware/private-route
 import { UserServiceInterface } from '../user/user-service.interface.js';
 import { CommentRDO } from '../comment/rdo/comment-rdo.js';
 import { MAX_DISPLAY_OFFERS_COUNT } from './offer.const.js';
+import { IsOfferOwnerMiddleware } from '../../libs/rest/middleware/offer-owner.middleware.js';
 
 export class OfferController extends BaseController {
   constructor(
@@ -49,6 +50,7 @@ export class OfferController extends BaseController {
       handler: this.update,
       middlewares: [
         new PrivateRouteMiddleware(),
+        new IsOfferOwnerMiddleware(this.offerService),
         new ValidateObjectIdMiddleware('offerId'),
         new ValidateDTOMiddleware(UpdateOfferDto),
         new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
@@ -60,12 +62,13 @@ export class OfferController extends BaseController {
       handler: this.delete,
       middlewares: [
         new PrivateRouteMiddleware(),
+        new IsOfferOwnerMiddleware(this.offerService),
         new ValidateObjectIdMiddleware('offerId'),
         new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
       ],
     });
     this.addRoute({
-      path: '/premium',
+      path: '/premium/:city',
       method: HttpMethod.Get,
       handler: this.showPremiumOffers,
     });
@@ -135,8 +138,9 @@ export class OfferController extends BaseController {
   }
 
   public async update(req: Request, res: Response) {
+    const { offerId } = req.params;
     const updateOffer = await this.offerService.updateById(
-      req.params.id as string,
+      offerId as string,
       req.body,
     );
 
@@ -144,29 +148,32 @@ export class OfferController extends BaseController {
   }
 
   public async delete(req: Request, res: Response) {
-    const offer = await this.offerService.findOfferById(
-      req.params.id as string,
-    );
+    const { offerId } = req.params;
+    const offer = await this.offerService.findOfferById(offerId as string);
 
     if (!offer) {
-      const error = new Error(`Offer with id ${req.params.id} not found`);
+      const error = new Error(`Offer with id ${offerId} not found`);
       this.send(res, StatusCodes.NOT_FOUND, { error: error.message });
 
       return this.logger.error(error.message, error);
     }
     const result = await this.offerService.deleteById(offer.id);
+    await this.commentService.deleteByOfferId(offer.id);
+
     this.noContent(res, fillDTO(OfferRDO, result));
   }
 
   public async showPremiumOffers(req: Request, res: Response) {
-    const city = req.params.city as City;
-    const premiumOffers = await this.offerService.findPremiumOffersByCity(city);
+    const { city } = req.params;
+    const premiumOffers = await this.offerService.findPremiumOffersByCity(
+      city as City,
+    );
 
     this.ok(res, fillDTO(OfferRDO, premiumOffers));
   }
 
   public async getComments(req: Request, res: Response) {
-    const offerId = req.params.offerId;
+    const { offerId } = req.params;
 
     const comments = await this.commentService.findByOfferId(offerId as string);
 

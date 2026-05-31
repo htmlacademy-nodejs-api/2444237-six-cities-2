@@ -1,5 +1,5 @@
 import { CommandParser } from './command-parser.js';
-import { Command } from './command.interfaсe.js';
+import { Command } from './command.interface.js';
 
 type CollectionCommand = Record<string, Command>;
 

@@ -1,6 +1,6 @@
 import got from 'got';
 import { MockServerData } from '../shared/types/mock-server.js';
-import { Command } from './command.interfaсe.js';
+import { Command } from './command.interface.js';
 import { appendFile } from 'node:fs/promises';
 import { TSVOfferGenerator } from '../shared/libs/offer-generator/offer-generator.js';
 
@@ -29,7 +29,6 @@ export class GenerateCommand implements Command {
   }
 
   async execute(...parameters: string[]): Promise<void> {
-    console.log(parameters);
     const [count, path, url] = parameters;
     const offerCount = parseInt(count, 10);
 
