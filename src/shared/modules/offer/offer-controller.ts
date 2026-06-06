@@ -109,7 +109,7 @@ export class OfferController extends BaseController {
   }
 
   public async index(req: Request, res: Response) {
-    const limit = Number(req.params.limit) || MAX_DISPLAY_OFFERS_COUNT;
+    const limit = Number(req.query.limit) || MAX_DISPLAY_OFFERS_COUNT;
     const offers = await this.offerService.find(limit);
     let favoritesIds: string[] = [];
 

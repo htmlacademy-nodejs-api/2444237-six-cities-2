@@ -68,7 +68,12 @@ export class OfferService implements OfferServiceInterface, DocumentExists {
   }
 
   async find(limit: number): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel.find().populate('host').limit(limit).exec();
+    return this.offerModel
+      .find()
+      .populate('host')
+      .sort({ date: -1 })
+      .limit(limit)
+      .exec();
   }
 
   async findPremiumOffersByCity(
@@ -102,9 +107,13 @@ export class OfferService implements OfferServiceInterface, DocumentExists {
     userId: string,
   ): Promise<DocumentType<UserEntity> | null> {
     const result = await this.userModel
-      .findByIdAndUpdate(userId, {
-        $addToSet: { favorites: new mongoose.Types.ObjectId(offerId) },
-      })
+      .findByIdAndUpdate(
+        userId,
+        {
+          $addToSet: { favorites: new mongoose.Types.ObjectId(offerId) },
+        },
+        { new: true },
+      )
       .exec();
 
     return result;
