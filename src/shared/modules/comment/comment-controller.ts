@@ -34,7 +34,7 @@ export class CommentController extends BaseController {
     const { offerId } = req.params;
 
     const result = await this.commentService.create(
-      req.body,
+      { ...req.body, author: req.tokenPayload.id },
       offerId as string,
     );
     this.logger.info(`Comment created: ${req.body.text}`);

@@ -22,6 +22,7 @@ import { CommentRDO } from '../comment/rdo/comment-rdo.js';
 import { MAX_DISPLAY_OFFERS_COUNT } from './offer.const.js';
 import { IsOfferOwnerMiddleware } from '../../libs/rest/middleware/offer-owner.middleware.js';
 import { HttpError } from '../../libs/rest/errors/index.js';
+import { UserRDO } from '../user/rdo/user.rdo.js';
 
 export class OfferController extends BaseController {
   constructor(
@@ -129,17 +130,6 @@ export class OfferController extends BaseController {
   }
 
   public async create(req: Request, res: Response): Promise<void> {
-    const existOffer = await this.offerService.findById(req.body.id);
-
-    if (existOffer) {
-      const error = new Error(`Offer with id ${req.body.id} already exists`);
-      this.send(res, StatusCodes.UNPROCESSABLE_ENTITY, {
-        error: error.message,
-      });
-
-      return this.logger.error(error.message, error);
-    }
-
     const result = await this.offerService.create({
       ...req.body,
       host: req.tokenPayload.id,
@@ -191,7 +181,7 @@ export class OfferController extends BaseController {
       );
     }
     const response = await this.offerService.addFavorite(offer.id, user.id);
-    this.ok(res, response);
+    this.ok(res, fillDTO(UserRDO, response));
   }
 
   async deleteFavoriteOffers(req: Request, res: Response) {
@@ -214,7 +204,7 @@ export class OfferController extends BaseController {
     }
     await this.offerService.deleteFavorite(offer.id, user.id);
     const updatedUser = await this.userService.findById(user.id);
-    this.ok(res, updatedUser);
+    this.ok(res, fillDTO(UserRDO, updatedUser));
   }
 
   public async delete(req: Request, res: Response) {
@@ -230,7 +220,7 @@ export class OfferController extends BaseController {
     const result = await this.offerService.deleteById(offer.id);
     await this.commentService.deleteById(offer.id);
 
-    this.noContent(res, fillDTO(OfferRDO, result));
+    this.send(res, StatusCodes.NO_CONTENT, result);
   }
 
   public async showPremiumOffers(req: Request, res: Response) {

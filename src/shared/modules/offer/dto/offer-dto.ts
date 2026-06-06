@@ -48,7 +48,7 @@ export class CreateOfferDto {
   @IsBoolean({ message: OfferDTOValidationMessage.isFavorite.isBoolean })
     isFavorite!: boolean;
 
-  @Min(1, { message: OfferDTOValidationMessage.rating.min })
+  @Min(0, { message: OfferDTOValidationMessage.rating.min })
   @Max(5, { message: OfferDTOValidationMessage.rating.max })
     rating!: number;
 

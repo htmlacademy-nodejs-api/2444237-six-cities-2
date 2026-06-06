@@ -29,7 +29,7 @@ export class CommentService implements CommentServiceInterface {
 
     await this.offerService.recalcRating(offerId);
 
-    return result.populate('author');
+    return result;
   }
 
   public async findById(

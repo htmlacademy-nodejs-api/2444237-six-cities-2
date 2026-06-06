@@ -89,14 +89,34 @@ export class UserController extends BaseController {
   }
 
   public async getFavorites(req: Request, res: Response) {
-    const user = await this.userService.findById(req.tokenPayload.id);
-    if (!user) {
+    const { userId } = req.params;
+
+    if (!req.tokenPayload.id) {
       throw new HttpError(
         StatusCodes.UNAUTHORIZED,
         'Unauthorized',
         'UserController',
       );
     }
+
+    if (userId !== req.tokenPayload.id) {
+      throw new HttpError(
+        StatusCodes.FORBIDDEN,
+        'Access denied',
+        'UserController',
+      );
+    }
+
+    const user = await this.userService.findById(userId);
+
+    if (!user) {
+      throw new HttpError(
+        StatusCodes.NOT_FOUND,
+        'User not found',
+        'UserController',
+      );
+    }
+
     const favorites = await this.userService.findFavorite(user.id);
 
     const favoritesWithStatus = favorites.map((offer) => ({
@@ -122,11 +142,11 @@ export class UserController extends BaseController {
   }
 
   public async uploadAvatar(req: Request, res: Response) {
-    const user = await this.userService.findById(req.tokenPayload.id);
+    const { userId } = req.params;
+    const user = await this.userService.findById(userId as string);
     await this.userService.updateAvatar(user?.id, req.file?.filename as string);
-    this.created(res, {
-      file: req.file?.path,
-    });
+
+    this.created(res, req.file?.path);
   }
 
   public async checkAuthenticate(req: Request, res: Response) {

@@ -40,7 +40,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ValidationErrorResponse'
 
         '500':
           description: Произошла ошибка на сервере
@@ -67,12 +67,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/LoggedUser'
 
-        '401':
-          description: Неверный email или пароль
+        '404':
+          description: Пользователь не найден
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/AuthErrorResponse'
 
         '500':
           description: Произошла ошибка на сервере
@@ -116,6 +116,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserFavoriteOffers'
+        '401':
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Пользователь не является владельцем списка избранного
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Произошла ошибка на сервере
           content:
@@ -134,11 +152,10 @@ paths:
          content:
            multipart/form-data:
              schema:
-               type: object
+               type: string
                properties:
-                 avatar:
-                   type: string
-                   format: binary
+                 file:
+                  type: string
        responses:
          '201':
            description: Аватар успешно загружен
@@ -192,7 +209,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '500':
           description: Произошла ошибка на сервере
           content:
@@ -220,7 +237,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFound'
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Произошла ошибка на сервере
           content:
@@ -261,14 +278,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFound'
+                $ref: '#/components/schemas/ErrorResponse'
 
          '400':
           description: Некорректные данные
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ValidationErrorResponse'
 
          '500':
           description: Произошла ошибка на сервере
@@ -294,7 +311,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFound'
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Произошла ошибка на сервере
           content:
@@ -322,7 +339,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFound'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Пользователь не авторизован
           content:
@@ -355,7 +372,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFound'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Пользователь не авторизован
           content:
@@ -445,7 +462,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '500':
           description: Произошла ошибка на сервере
           content:
@@ -461,10 +478,45 @@ components:
   schemas:
     ErrorResponse:
       type: object
+      required: [error]
       properties:
         error:
           type: string
-          example: 'Error message'
+          example: 'offer with id 507f1f77bcf86cd799439011 not found'
+    ValidationErrorItem:
+      type: object
+      properties:
+        property:
+          type: string
+          example: 'email'
+        value:
+          description: Некорректное значение поля
+        constraints:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            isEmail: 'email must be an email'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationErrorItem'
+    ValidationErrorResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/ValidationErrorItem'
+    
+    AuthErrorResponse:
+      type: object
+      required: [type, error]
+      properties:
+        type:
+          type: string
+          enum: [AUTHORIZATION]
+          example: 'AUTHORIZATION'
+        error:
+          type: string
+          example: 'User password incorrect'
 
     LoginUser:
       type: object
@@ -776,20 +828,17 @@ components:
 
     CreateComment:
       type: object
-      required: [text, author, rating, date]
+      required: [text, rating, date]
       properties:
         text:
           type: string
           minLength: 5
           maxLength: 1024
           example: 'Comment text'
-        author:
-          type: string
-          example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
         rating:
           type: number
           minimum: 1
-          maximum: 5
+          maximum: 5  
           example: 5
         date:
           type: string
@@ -802,9 +851,6 @@ components:
         text:
           type: string
           example: 'Comment text'
-        offerId:
-          type: string
-          example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
         author:
           type: string
           example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
@@ -867,20 +913,7 @@ components:
       items:
         $ref: '#/components/schemas/CommentRdo'
 
-    NotFound:
-      type: object
-      properties:
-        message:
-          type: string
-          example: 'Resource not found'
-
   responses:
-    NotFound:
-      description: Not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/NotFound'
     UserResponse:
       description: Response with user
       content:
