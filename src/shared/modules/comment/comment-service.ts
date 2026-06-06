@@ -18,18 +18,21 @@ export class CommentService implements CommentServiceInterface {
     private readonly offerService: OfferServiceInterface,
   ) {}
 
-  public async createComment(dto: CommentDto): Promise<CommentEntity> {
-    const result = await this.commentModel.create(dto);
+  public async create(
+    dto: CommentDto,
+    offerId: string,
+  ): Promise<CommentEntity> {
+    const result = await this.commentModel.create({ ...dto, offerId });
     this.logger.info(`Comment created: ${dto.text}`);
 
-    await this.offerService.incCommentCount(dto.offerId);
+    await this.offerService.incCommentCount(offerId);
 
-    await this.offerService.recalcRating(dto.offerId);
+    await this.offerService.recalcRating(offerId);
 
     return result.populate('author');
   }
 
-  public async findByOfferId(
+  public async findById(
     offerId: string,
   ): Promise<DocumentType<CommentEntity>[]> {
     return this.commentModel
@@ -39,7 +42,7 @@ export class CommentService implements CommentServiceInterface {
       .exec();
   }
 
-  public async deleteByOfferId(offerId: string): Promise<number> {
+  public async deleteById(offerId: string): Promise<number> {
     const result = await this.commentModel.deleteMany({ offerId }).exec();
 
     await this.offerService.decCommentCount(offerId);

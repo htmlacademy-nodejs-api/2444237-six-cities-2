@@ -7,10 +7,10 @@ export type User = {
   isPro: boolean;
 };
 
-export type Location = {
-  latitude: number;
-  longitude: number;
-};
+export class Location {
+  public latitude: number;
+  public longitude: number;
+}
 
 export type City =
   | 'Paris'

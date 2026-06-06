@@ -52,6 +52,7 @@ export class ImportCommand implements Command {
       this.logger,
       this.offerModel,
       this.commentModel,
+      this.userModel,
     );
   }
 
@@ -71,7 +72,7 @@ export class ImportCommand implements Command {
       { ...host, password: DEFAULT_USER_PASSWORD },
       this.salt,
     );
-    await this.offerService.createOffer({ ...offerData, host: user.id });
+    await this.offerService.create({ ...offerData, host: user.id });
   }
 
   public async execute(

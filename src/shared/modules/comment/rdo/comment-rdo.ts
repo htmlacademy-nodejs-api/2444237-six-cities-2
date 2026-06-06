@@ -5,14 +5,11 @@ export class CommentRDO {
     text: string;
 
   @Expose()
-    offerId!: string;
-
-  @Expose()
-    author!: string;
+    date!: Date;
 
   @Expose()
     rating!: number;
 
   @Expose()
-    date!: Date;
+    author!: string;
 }

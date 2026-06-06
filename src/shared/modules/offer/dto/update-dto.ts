@@ -4,6 +4,7 @@ import {
   IsDateString,
   IsEnum,
   IsInt,
+  IsMongoId,
   IsObject,
   IsString,
   Max,
@@ -66,7 +67,7 @@ export class UpdateOfferDto {
     ['Paris', 'Cologne', 'Brussels', 'Amsterdam', 'Hamburg', 'Dusseldorf'],
     { message: OfferDTOValidationMessage.city.isEnum },
   )
-    city!: City;
+    city?: City;
 
   @IsString({ message: OfferDTOValidationMessage.imagePreview.isString })
     imagePreview?: string;
@@ -104,7 +105,7 @@ export class UpdateOfferDto {
   @IsArray({ message: OfferDTOValidationMessage.goods.isArray })
     goods?: Amenity[];
 
-  @IsObject({ message: OfferDTOValidationMessage.host.isObject })
+  @IsMongoId({ message: OfferDTOValidationMessage.host.isMongoId })
     host?: string;
 
   @IsInt({ message: OfferDTOValidationMessage.commentsCount.isInt })

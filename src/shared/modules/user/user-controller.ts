@@ -19,13 +19,10 @@ import { CreateUserDto, LoginUserDTO } from './dto/user-dto.js';
 import { AuthServiceInterface, UserNotFoundException } from '../auth/index.js';
 import { PrivateRouteMiddleware } from '../../libs/rest/middleware/private-route.middleware.js';
 import { UploadFileMiddleware } from '../../libs/rest/middleware/upload-file.middleware.js';
-import { OfferServiceInterface } from '../offer/offer-service.interface.js';
 
 export class UserController extends BaseController {
   constructor(
     @inject(Component.Logger) protected readonly logger: Logger,
-    @inject(Component.OfferService)
-    private readonly offerService: OfferServiceInterface,
     @inject(Component.UserService)
     private readonly userService: UserServiceInterface,
     @inject(Component.Config) private readonly config: Config<RestSchema>,
@@ -72,20 +69,6 @@ export class UserController extends BaseController {
       handler: this.checkAuthenticate,
       middlewares: [new PrivateRouteMiddleware()],
     });
-
-    this.addRoute({
-      path: '/:offerId/favorite',
-      method: HttpMethod.Post,
-      handler: this.addFavoriteOffers,
-      middlewares: [new PrivateRouteMiddleware()],
-    });
-
-    this.addRoute({
-      path: '/:offerId/favorite',
-      method: HttpMethod.Delete,
-      handler: this.deleteFavoriteOffers,
-      middlewares: [new PrivateRouteMiddleware()],
-    });
   }
 
   public async create(req: Request, res: Response) {
@@ -114,9 +97,14 @@ export class UserController extends BaseController {
         'UserController',
       );
     }
-    const favorites = await this.userService.findFavoriteOffers(user.id);
+    const favorites = await this.userService.findFavorite(user.id);
 
-    this.ok(res, fillDTO(UserFavoriteOfferRDO, favorites));
+    const favoritesWithStatus = favorites.map((offer) => ({
+      ...offer.toObject(),
+      isFavorite: true,
+    }));
+
+    this.ok(res, fillDTO(UserFavoriteOfferRDO, favoritesWithStatus));
   }
 
   public async auth(req: Request, res: Response) {
@@ -133,7 +121,9 @@ export class UserController extends BaseController {
     this.ok(res, response);
   }
 
-  public uploadAvatar(req: Request, res: Response) {
+  public async uploadAvatar(req: Request, res: Response) {
+    const user = await this.userService.findById(req.tokenPayload.id);
+    await this.userService.updateAvatar(user?.id, req.file?.filename as string);
     this.created(res, {
       file: req.file?.path,
     });
@@ -149,51 +139,6 @@ export class UserController extends BaseController {
         'UserController',
       );
     }
-    this.ok(res, fillDTO(LoggedUserRDO, user));
-  }
-
-  public async addFavoriteOffers(req: Request, res: Response) {
-    const { offerId } = req.params;
-    const user = await this.userService.findById(req.tokenPayload.id);
-    if (!user) {
-      throw new HttpError(
-        StatusCodes.UNAUTHORIZED,
-        'Unauthorized',
-        'UserController',
-      );
-    }
-    const offer = await this.offerService.findOfferById(offerId as string);
-    if (!offer) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'Offer not found',
-        'UserController',
-      );
-    }
-    const response = await this.userService.addFavoriteOffer(offer.id, user.id);
-    this.ok(res, response);
-  }
-
-  async deleteFavoriteOffers(req: Request, res: Response) {
-    const { offerId } = req.params;
-    const user = await this.userService.findById(req.tokenPayload.id);
-    if (!user) {
-      throw new HttpError(
-        StatusCodes.UNAUTHORIZED,
-        'Unauthorized',
-        'UserController',
-      );
-    }
-    const offer = await this.offerService.findOfferById(offerId as string);
-    if (!offer) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'Offer not found',
-        'UserController',
-      );
-    }
-    await this.userService.deleteFavoriteOffer(offer.id, user.id);
-    const updatedUser = await this.userService.findById(user.id);
-    this.ok(res, updatedUser);
+    this.ok(res, fillDTO(UserRDO, user));
   }
 }

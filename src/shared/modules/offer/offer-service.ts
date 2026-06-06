@@ -5,11 +5,12 @@ import { OfferEntity } from './offer.entity.js';
 import { Component } from '../../types/container.js';
 import { Logger } from '../../libs/logger/index.js';
 import { City, UpdateOfferDto } from './dto/update-dto.js';
-import { DocumentType, types } from '@typegoose/typegoose';
+import { DocumentType, mongoose, types } from '@typegoose/typegoose';
 import { CommentEntity } from '../comment/comment.entity.js';
 import { Types } from 'mongoose';
 import { DocumentExists } from '../../libs/rest/types/document-exists.interface.js';
 import { DISPLAY_PREMIUM_OFFERS_COUNT } from './offer.const.js';
+import { UserEntity } from '../user/index.js';
 
 @injectable()
 export class OfferService implements OfferServiceInterface, DocumentExists {
@@ -19,15 +20,17 @@ export class OfferService implements OfferServiceInterface, DocumentExists {
     private readonly offerModel: types.ModelType<OfferEntity>,
     @inject(Component.CommentModel)
     private readonly commentModel: types.ModelType<CommentEntity>,
+    @inject(Component.UserModel)
+    private readonly userModel: types.ModelType<UserEntity>,
   ) {}
 
-  async createOffer(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>> {
+  async create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>> {
     const result = await this.offerModel.create(dto);
     this.logger.info(`New offer created: ${dto.title}`);
     return result;
   }
 
-  async findOfferById(id: string): Promise<DocumentType<OfferEntity> | null> {
+  async findById(id: string): Promise<DocumentType<OfferEntity> | null> {
     return this.offerModel.findById(id).populate('host').exec();
   }
 
@@ -92,5 +95,33 @@ export class OfferService implements OfferServiceInterface, DocumentExists {
     return this.offerModel
       .findByIdAndUpdate(offerId, { $inc: { commentsCount: -1 } })
       .exec();
+  }
+
+  async addFavorite(
+    offerId: string,
+    userId: string,
+  ): Promise<DocumentType<UserEntity> | null> {
+    const result = await this.userModel
+      .findByIdAndUpdate(userId, {
+        $addToSet: { favorites: new mongoose.Types.ObjectId(offerId) },
+      })
+      .exec();
+
+    return result;
+  }
+
+  async deleteFavorite(
+    offerId: string,
+    userId: string,
+  ): Promise<DocumentType<UserEntity> | null> {
+    const result = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { $pull: { favorites: new mongoose.Types.ObjectId(offerId) } },
+        { new: true },
+      )
+      .exec();
+
+    return result;
   }
 }

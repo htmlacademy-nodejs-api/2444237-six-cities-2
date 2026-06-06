@@ -48,7 +48,5 @@ export class AppExceptionFilter implements ExceptionFilter {
     }
 
     this.handleCustomError(err, req, res, next);
-
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err.message });
   }
 }

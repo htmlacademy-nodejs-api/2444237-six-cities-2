@@ -15,7 +15,7 @@ export class IsOfferOwnerMiddleware implements Middleware {
     const userId = req.tokenPayload.id;
     const { offerId } = req.params;
 
-    const offer = await this.service.findOfferById(offerId as string);
+    const offer = await this.service.findById(offerId as string);
 
     if (!offer) {
       return next(
@@ -37,7 +37,7 @@ export class IsOfferOwnerMiddleware implements Middleware {
       );
     }
 
-    if (offer.host.toString() !== userId) {
+    if (offer.host.id !== userId) {
       return next(
         new HttpError(
           StatusCodes.FORBIDDEN,

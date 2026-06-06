@@ -21,6 +21,7 @@ import { UserServiceInterface } from '../user/user-service.interface.js';
 import { CommentRDO } from '../comment/rdo/comment-rdo.js';
 import { MAX_DISPLAY_OFFERS_COUNT } from './offer.const.js';
 import { IsOfferOwnerMiddleware } from '../../libs/rest/middleware/offer-owner.middleware.js';
+import { HttpError } from '../../libs/rest/errors/index.js';
 
 export class OfferController extends BaseController {
   constructor(
@@ -50,9 +51,9 @@ export class OfferController extends BaseController {
       handler: this.update,
       middlewares: [
         new PrivateRouteMiddleware(),
-        new IsOfferOwnerMiddleware(this.offerService),
         new ValidateObjectIdMiddleware('offerId'),
         new ValidateDTOMiddleware(UpdateOfferDto),
+        new IsOfferOwnerMiddleware(this.offerService),
         new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
       ],
     });
@@ -62,8 +63,8 @@ export class OfferController extends BaseController {
       handler: this.delete,
       middlewares: [
         new PrivateRouteMiddleware(),
-        new IsOfferOwnerMiddleware(this.offerService),
         new ValidateObjectIdMiddleware('offerId'),
+        new IsOfferOwnerMiddleware(this.offerService),
         new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
       ],
     });
@@ -90,6 +91,20 @@ export class OfferController extends BaseController {
         new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
       ],
     });
+
+    this.addRoute({
+      path: '/:offerId/favorite',
+      method: HttpMethod.Post,
+      handler: this.addFavoriteOffers,
+      middlewares: [new PrivateRouteMiddleware()],
+    });
+
+    this.addRoute({
+      path: '/:offerId/favorite',
+      method: HttpMethod.Delete,
+      handler: this.deleteFavoriteOffers,
+      middlewares: [new PrivateRouteMiddleware()],
+    });
   }
 
   public async index(req: Request, res: Response) {
@@ -107,12 +122,14 @@ export class OfferController extends BaseController {
       ...offer.toObject(),
       isFavorite: favoritesIds.includes(offer.id),
     }));
+
     const responseData = fillDTO(OfferRDO, offersWithStatus);
+
     this.ok(res, responseData);
   }
 
   public async create(req: Request, res: Response): Promise<void> {
-    const existOffer = await this.offerService.findOfferById(req.body.id);
+    const existOffer = await this.offerService.findById(req.body.id);
 
     if (existOffer) {
       const error = new Error(`Offer with id ${req.body.id} already exists`);
@@ -123,7 +140,7 @@ export class OfferController extends BaseController {
       return this.logger.error(error.message, error);
     }
 
-    const result = await this.offerService.createOffer({
+    const result = await this.offerService.create({
       ...req.body,
       host: req.tokenPayload.id,
     });
@@ -131,10 +148,18 @@ export class OfferController extends BaseController {
   }
 
   public async getDetailOffers(req: Request, res: Response) {
-    const offer = await this.offerService.findOfferById(
+    const offer = await this.offerService.findById(
       req.params.offerId as string,
     );
-    this.ok(res, fillDTO(OfferRDO, offer));
+
+    let isFavorite = false;
+
+    if (req.tokenPayload) {
+      const user = await this.userService.findById(req.tokenPayload.id);
+      isFavorite =
+        user?.favorites.some((id) => id.toString() === offer?.id) ?? false;
+    }
+    this.ok(res, fillDTO(OfferRDO, { ...offer?.toObject(), isFavorite }));
   }
 
   public async update(req: Request, res: Response) {
@@ -147,9 +172,54 @@ export class OfferController extends BaseController {
     this.ok(res, fillDTO(OfferRDO, updateOffer));
   }
 
+  public async addFavoriteOffers(req: Request, res: Response) {
+    const { offerId } = req.params;
+    const user = await this.userService.findById(req.tokenPayload.id);
+    if (!user) {
+      throw new HttpError(
+        StatusCodes.UNAUTHORIZED,
+        'Unauthorized',
+        'UserController',
+      );
+    }
+    const offer = await this.offerService.findById(offerId as string);
+    if (!offer) {
+      throw new HttpError(
+        StatusCodes.NOT_FOUND,
+        'Offer not found',
+        'UserController',
+      );
+    }
+    const response = await this.offerService.addFavorite(offer.id, user.id);
+    this.ok(res, response);
+  }
+
+  async deleteFavoriteOffers(req: Request, res: Response) {
+    const { offerId } = req.params;
+    const user = await this.userService.findById(req.tokenPayload.id);
+    if (!user) {
+      throw new HttpError(
+        StatusCodes.UNAUTHORIZED,
+        'Unauthorized',
+        'UserController',
+      );
+    }
+    const offer = await this.offerService.findById(offerId as string);
+    if (!offer) {
+      throw new HttpError(
+        StatusCodes.NOT_FOUND,
+        'Offer not found',
+        'UserController',
+      );
+    }
+    await this.offerService.deleteFavorite(offer.id, user.id);
+    const updatedUser = await this.userService.findById(user.id);
+    this.ok(res, updatedUser);
+  }
+
   public async delete(req: Request, res: Response) {
     const { offerId } = req.params;
-    const offer = await this.offerService.findOfferById(offerId as string);
+    const offer = await this.offerService.findById(offerId as string);
 
     if (!offer) {
       const error = new Error(`Offer with id ${offerId} not found`);
@@ -158,7 +228,7 @@ export class OfferController extends BaseController {
       return this.logger.error(error.message, error);
     }
     const result = await this.offerService.deleteById(offer.id);
-    await this.commentService.deleteByOfferId(offer.id);
+    await this.commentService.deleteById(offer.id);
 
     this.noContent(res, fillDTO(OfferRDO, result));
   }
@@ -169,13 +239,26 @@ export class OfferController extends BaseController {
       city as City,
     );
 
-    this.ok(res, fillDTO(OfferRDO, premiumOffers));
+    let favoritesIds: string[] = [];
+
+    if (req.tokenPayload) {
+      const user = await this.userService.findById(req.tokenPayload.id);
+      favoritesIds =
+        user?.favorites.map((offer) => offer.toString()) ?? ([] as string[]);
+    }
+
+    const offersWithStatus = premiumOffers.map((offer) => ({
+      ...offer.toObject(),
+      isFavorite: favoritesIds.includes(offer.id),
+    }));
+
+    this.ok(res, fillDTO(OfferRDO, offersWithStatus));
   }
 
   public async getComments(req: Request, res: Response) {
     const { offerId } = req.params;
 
-    const comments = await this.commentService.findByOfferId(offerId as string);
+    const comments = await this.commentService.findById(offerId as string);
 
     this.ok(res, fillDTO(CommentRDO, comments));
   }

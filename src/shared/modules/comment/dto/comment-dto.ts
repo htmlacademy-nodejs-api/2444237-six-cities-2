@@ -13,9 +13,6 @@ export class CommentDto {
   @MaxLength(1024, { message: CommentDTOValidationMessage.text.max })
     text!: string;
 
-  @IsMongoId({ message: CommentDTOValidationMessage.offerId.isMongoId })
-    offerId!: string;
-
   @IsMongoId({ message: CommentDTOValidationMessage.author.isMongoId })
     author!: string;
 

@@ -61,7 +61,7 @@ export const OfferDTOValidationMessage = {
   },
 
   host: {
-    isObject: 'Host must be an object.',
+    isMongoId: 'Host must be a valid mongo id.',
   },
 
   commentsCount: {

@@ -7,7 +7,6 @@ import { Component } from '../../types/container.js';
 import { Logger } from '../../libs/logger/index.js';
 import { OfferEntity } from '../offer/offer.entity.js';
 import { DEFAULT_AVATAR_FILE_NAME } from './user.constant.js';
-import mongoose from 'mongoose';
 
 @injectable()
 export class UserService implements UserServiceInterface {
@@ -37,9 +36,7 @@ export class UserService implements UserServiceInterface {
     return this.userModel.findById(id).exec();
   }
 
-  async findFavoriteOffers(
-    userId: number,
-  ): Promise<DocumentType<OfferEntity>[]> {
+  async findFavorite(userId: number): Promise<DocumentType<OfferEntity>[]> {
     const user = await this.userModel
       .findById(userId)
       .populate('favorites')
@@ -47,39 +44,12 @@ export class UserService implements UserServiceInterface {
     return (user?.favorites as DocumentType<OfferEntity>[]) ?? [];
   }
 
-  async toggleFavoriteOffer(offerId: string, userId: number): Promise<void> {
-    const user = await UserModel.findById(userId).populate('favorites').exec();
-    if (!user) {
-      return;
-    }
-
-    if (user.favorites.find((offer) => offer._id.toString() === offerId)) {
-      await UserModel.findByIdAndUpdate(userId, {
-        $pull: { favorites: offerId },
-      });
-    } else {
-      await UserModel.findByIdAndUpdate(userId, {
-        $push: { favorites: offerId },
-      });
-    }
-  }
-
-  async addFavoriteOffer(offerId: string, userId: string): Promise<void> {
-    await UserModel.findByIdAndUpdate(userId, {
-      $addToSet: { favorites: new mongoose.Types.ObjectId(offerId) },
-    });
-  }
-
-  async deleteFavoriteOffer(
-    offerId: string,
-    userId: string,
+  async updateAvatar(
+    userId: number,
+    avatar: string,
   ): Promise<DocumentType<UserEntity> | null> {
-    const result = await UserModel.findByIdAndUpdate(
-      userId,
-      { $pull: { favorites: new mongoose.Types.ObjectId(offerId) } },
-      { new: true },
-    ).exec();
-
-    return result;
+    return this.userModel
+      .findByIdAndUpdate(userId, { $set: { avatar } }, { new: true })
+      .exec();
   }
 }

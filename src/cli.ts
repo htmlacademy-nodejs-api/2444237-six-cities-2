@@ -1,3 +1,4 @@
+#!/usr/bin/env node --loader ts-node/esm
 import 'reflect-metadata';
 import { CliApplication } from './cli/cli-application.js';
 import { Command } from './cli/command.interface.js';

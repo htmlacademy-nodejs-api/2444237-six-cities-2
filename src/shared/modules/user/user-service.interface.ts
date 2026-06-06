@@ -7,11 +7,9 @@ export interface UserServiceInterface {
   register(dto: CreateUserDto, salt: string): Promise<DocumentType<UserEntity>>;
   findByEmail(email: string): Promise<DocumentType<UserEntity> | null>;
   findById(id: string): Promise<DocumentType<UserEntity> | null>;
-  findFavoriteOffers(userId: number): Promise<DocumentType<OfferEntity>[]>;
-  deleteFavoriteOffer(
-    offerId: string,
-    userId: string,
+  findFavorite(userId: number): Promise<DocumentType<OfferEntity>[]>;
+  updateAvatar(
+    userId: number,
+    avatar: string,
   ): Promise<DocumentType<UserEntity> | null>;
-  addFavoriteOffer(offerId: string, userId: string): Promise<void>;
-  toggleFavoriteOffer(offerId: string, userId: number): Promise<void>;
 }

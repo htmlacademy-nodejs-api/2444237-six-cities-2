@@ -14,7 +14,7 @@ tags:
     description: Комментарии
 
 paths:
-  /register:
+  /users/register:
     post:
       summary: Создать пользователя
       tags: [Users]
@@ -26,9 +26,16 @@ paths:
         required: true
       responses:
         '201':
-          $ref: '#/components/responses/Created'
+          $ref: '#/components/responses/UserResponse'
 
-        '422':
+        '409':
+          description: Пользователь с таким email уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '400':
           description: Некорректные данные
           content:
             application/json:
@@ -42,7 +49,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /login:
+  /users/login:
     post:
       summary: Авторизация пользователя
       tags: [Users]
@@ -50,7 +57,7 @@ paths:
         content:
           application/json:
             schema:
-             $ref: '#/components/schemas/Authorization'
+             $ref: '#/components/schemas/LoginUser'
         required: true
       responses:
         '200':
@@ -58,7 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: '#/components/schemas/LoggedUser'
 
         '401':
           description: Неверный email или пароль
@@ -85,13 +92,68 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserResponse'
         '401':
           description: Пользователь не авторизован
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{userId}/favorite:
+    get:
+      summary: Получить список избранных предложений
+      parameters:
+        - in: path
+          name: userId
+          required: true
+      tags: [Users]
+      bearerAuth: []
+      responses:
+        '200':
+          description: Предложения успешно получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFavoriteOffers'
+        '500':
+          description: Произошла ошибка на сервере
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /users/{userId}/avatar:
+     post:
+       summary: Загрузка аватара
+       parameters:
+         - in: path
+           name: userId
+           required: true
+       tags: [Users]
+       requestBody:
+         content:
+           multipart/form-data:
+             schema:
+               type: object
+               properties:
+                 avatar:
+                   type: string
+                   format: binary
+       responses:
+         '201':
+           description: Аватар успешно загружен
+           content:
+             application/json:
+               type: string
+               description: Путь к загруженному файлу
+               example: 'https://example.com/avatar.jpg'
+         '500':
+           description: Произошла ошибка на сервере
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/ErrorResponse'
+
   /offers:
     get:
       summary: Получить список предложений
@@ -111,30 +173,64 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     post:
       summary: Добавление нового предложения
+      bearerAuth: []
       tags: [Offers]
       requestBody:
         content:
           application/json:
             schema:
-             $ref: '#/components/schemas/Offer'
+             $ref: '#/components/schemas/CreateOffer'
       responses:
         '201':
           description: Заказ успешно добавлен
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Offer'
-        '422':
+                $ref: '#/components/schemas/OfferRdo'
+        '400':
           description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Произошла ошибка на сервере
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
   /offers/{offerId}:
+    get:
+      summary: Получение предложения
+      tags: [Offers]
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+      responses:
+        '200':
+          description: Предложение успешно получено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferRdo'
+        '404':
+          description: Предложение не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Произошла ошибка на сервере
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: Редактирование предложения
       tags: [Offers]
+      bearerAuth: []
       parameters:
         - in: path
           name: offerId
@@ -145,14 +241,20 @@ paths:
         content:
           application/json:
             schema:
-             $ref: '#/components/schemas/Offer'
+             $ref: '#/components/schemas/UpdateOffer'
       responses:
          '200':
           description: Предложение успешно обновлено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Offer'
+                $ref: '#/components/schemas/OfferRdo'
+         '403':
+          description: Пользователь не является владельцем предложения
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
          '404':
           description: Предложение не найдено
@@ -161,7 +263,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/NotFound'
 
-         '422':
+         '400':
           description: Некорректные данные
           content:
             application/json:
@@ -176,6 +278,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
       summary: Удаление предложения
+      bearerAuth: []
       tags: [Offers]
       parameters:
         - in: path
@@ -184,14 +287,111 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '204':
           description: Предложение успешно удалено
+        '404':
+          description: Ресурс не найден или доступ запрещён
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Offer'
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Произошла ошибка на сервере
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /offers/{offerId}/favorite
+    post:
+      summary: Добавление предложения в избранное
+      bearerAuth: []
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+      tags: [Users]
+      responses:
+        '200':
+          description: Предложение успешно добавлено в избранное
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: Предложение не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '403':
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Произошла ошибка на сервере
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Удаление предложения из избранного
+      bearerAuth: []
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+      tags: [Users]
+      responses:
+        '200':
+          description: Предложение успешно удалено из избранного
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+         '404':
+          description: Предложение не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '403':
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Произошла ошибка на сервере
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'  
 
-
+  /offers/premium/{city}:
+    get:
+      summary: Получить список премиум предложений
+      tags: [Offers]
+      parameters:
+        - in: path
+          name: city
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Предложения успешно получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offers'
+        '500':
+          description: Произошла ошибка на сервере
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /offers/{offerId}/comments/:
     get:
       summary: Получить список комментариев
@@ -209,20 +409,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comments'
+        '500':
+          description: Произошла ошибка на сервере
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /comments/{offerId}:
     post:
       summary: Добавление нового комментария
+      tags: [Comments]
       parameters:
         - in: path
           name: offerId
-          required: true
           schema:
             type: string
-      tags: [Comments]
+            example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
+          required: true
       requestBody:
         content:
           application/json:
             schema:
-             $ref: '#/components/schemas/Comment'
+             $ref: '#/components/schemas/CreateComment'
         required: true
       responses:
         '201':
@@ -230,8 +439,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Comment'
-        '422':
+                $ref: '#/components/schemas/CommentRdo'
+        '400':
           description: Некорректные данные
           content:
             application/json:
@@ -253,28 +462,35 @@ components:
     ErrorResponse:
       type: object
       properties:
-        message:
+        error:
           type: string
           example: 'Error message'
 
-    AuthResponse:
-      type: object
-      properties:
-        accessToken:
-          type: string
-          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-
-    Authorization:
+    LoginUser:
       type: object
       required: [email, password]
       properties:
         email:
           type: string
           format: email
-          example: 'john.doe@example'
+          example: 'john.doe@example.com'
         password:
           type: string
           example: 'qwerty123'
+          minLength: 6
+          maxLength: 12
+
+    LoggedUser:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: 'john.doe@example.com'
+        token:
+          type: string
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+
     User:
       type: object
       required: [name, email, password, isPro]
@@ -287,7 +503,7 @@ components:
         email:
           type: string
           format: email
-          example: 'john.doe@example'
+          example: 'john.doe@example.com'
         avatar:
           type: string
           example: 'https://example.com/avatar.jpg'
@@ -299,24 +515,79 @@ components:
         isPro:
           type: boolean
           example: false
-    Offer:
+
+    UserResponse:
       type: object
-      required: [title, description, date, city, previewImage, images, isPremium, isFavorite, rating, type, rooms, guests, price, goods, host, commentsCount, location]
+      properties:
+        name:
+          type: string
+          example: 'John Doe'
+        email:
+          type: string
+          format: email
+          example: 'john.doe@example.com'
+        avatar:
+          type: string
+          example: 'https://example.com/avatar.jpg'
+        isPro:
+          type: boolean
+          example: false
+        favorites:
+          type: array
+          items:
+            type: string
+            example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
+
+    Location:
+      type: object
+      required: [latitude, longitude]
+      properties:
+        latitude:
+          type: number
+          example: 48.8566
+        longitude:
+          type: number
+          example: 2.3522
+
+    CreateOffer:
+      type: object
+      required:
+        - title
+        - description
+        - date
+        - city
+        - imagePreview
+        - images
+        - isPremium
+        - isFavorite
+        - rating
+        - type
+        - bedrooms
+        - maxAdults
+        - price
+        - goods
+        - commentsCount
+        - location
       properties:
         title:
           type: string
+          minLength: 10
+          maxLength: 100
           example: 'Apartment in the center of the city'
         description:
           type: string
-          example: 'Apartment in the center of the city'
+          minLength: 20
+          maxLength: 1024
+          example: 'Apartment in the center of the city with a great view'
         date:
           type: string
           format: date
           example: '2026-01-20'
         city:
           type: string
-          example: 'New York'
-        previewImage:
+          enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+          example: 'Paris'
+        imagePreview:
           type: string
           example: 'https://example.com/preview.jpg'
         images:
@@ -329,76 +600,272 @@ components:
           example: true
         isFavorite:
           type: boolean
-          example: true
+          example: false
         rating:
           type: number
-          example: 5
           minimum: 1
           maximum: 5
+          example: 4.5
         type:
           type: string
           enum: [apartment, house, room, hotel]
           example: 'apartment'
-        rooms:
-          type: number
-          example: 3
-          minimum: 1
-          maximum: 10
-        guests:
-          type: number
-          example: 2
+        bedrooms:
+          type: integer
           minimum: 1
           maximum: 8
+          example: 2
+        maxAdults:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 4
         price:
-          type: number
-          example: 1000
-        features:
+          type: integer
+          minimum: 100
+          maximum: 100000
+          example: 5000
+        goods:
           type: array
-          enum: [Breakfast, Air conditioning, Laptop friendly workspace, Baby seat, Washer, Towels, Towels, Fridge]
           items:
             type: string
-            example: 'Breakfast'
-        comments:
-          type: number
-          example: 5
+            enum:
+              - Breakfast
+              - Air conditioning
+              - Laptop friendly workspace
+              - Baby seat
+              - Washer
+              - Towels
+              - Fridge
+          example: ['Breakfast', 'Air conditioning']
+        commentsCount:
+          type: integer
+          example: 0
         location:
-          type: object
-          properties:
-            latitude:
-              type: number
-              example: 50.4501
-            longitude:
-              type: number
-              example: 30.5234
+          $ref: '#/components/schemas/Location'
+
+    UpdateOffer:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 10
+          maxLength: 100
+          example: 'Apartment in the center of the city'
+        description:
+          type: string
+          minLength: 20
+          maxLength: 1024
+          example: 'Apartment in the center of the city with a great view'
+        date:
+          type: string
+          format: date
+          example: '2026-01-20'
+        city:
+          type: string
+          enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+          example: 'Paris'
+        imagePreview:
+          type: string
+          example: 'https://example.com/preview.jpg'
+        images:
+          type: array
+          items:
+            type: string
+            example: 'https://example.com/image.jpg'
+        isPremium:
+          type: boolean
+          example: true
+        isFavorite:
+          type: boolean
+          example: false
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          example: 4.5
+        type:
+          type: string
+          enum: [apartment, house, room, hotel]
+          example: 'apartment'
+        bedrooms:
+          type: integer
+          minimum: 1
+          maximum: 8
+          example: 2
+        maxAdults:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 4
+        price:
+          type: integer
+          minimum: 100
+          maximum: 100000
+          example: 5000
+        goods:
+          type: array
+          items:
+            type: string
+            enum:
+              - Breakfast
+              - Air conditioning
+              - Laptop friendly workspace
+              - Baby seat
+              - Washer
+              - Towels
+              - Fridge
+          example: ['Breakfast', 'Air conditioning']
+        commentsCount:
+          type: integer
+          example: 0
+        location:
+          $ref: '#/components/schemas/Location'
+
+    OfferRdo:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Apartment in the center of the city'
+        description:
+          type: string
+          example: 'Apartment in the center of the city with a great view'
+        date:
+          type: string
+          format: date-time
+          example: '2026-01-20T00:00:00.000Z'
+        city:
+          type: string
+          enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+          example: 'Paris'
+        imagePreview:
+          type: string
+          example: 'https://example.com/preview.jpg'
+        images:
+          type: array
+          items:
+            type: string
+            example: 'https://example.com/image.jpg'
+        isPremium:
+          type: boolean
+          example: true
+        isFavorite:
+          type: boolean
+          example: false
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          example: 4.5
+        type:
+          type: string
+          enum: [apartment, house, room, hotel]
+          example: 'apartment'
+        price:
+          type: integer
+          example: 5000
+        commentsCount:
+          type: integer
+          example: 12
+
     Offers:
       type: array
       items:
-        $ref: '#/components/schemas/Offer'
+        $ref: '#/components/schemas/OfferRdo'
 
-    Comment:
+    CreateComment:
       type: object
-      required: [text, date, rating, user]
+      required: [text, author, rating, date]
       properties:
         text:
           type: string
+          minLength: 5
+          maxLength: 1024
           example: 'Comment text'
+        author:
+          type: string
+          example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          example: 5
         date:
           type: string
           format: date-time
           example: '2022-01-01T00:00:00.000Z'
+
+    CommentRdo:
+      type: object
+      properties:
+        text:
+          type: string
+          example: 'Comment text'
+        offerId:
+          type: string
+          example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
+        author:
+          type: string
+          example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
         rating:
           type: number
-          example: 5
           minimum: 1
           maximum: 5
-        user:
+          example: 5
+        date:
           type: string
-          example: 'John Doe'
+          format: date-time
+          example: '2022-01-01T00:00:00.000Z'
+
+    UserFavoriteOffer:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Apartment in the center of the city'
+        date:
+          type: string
+          format: date-time
+          example: '2026-01-20T00:00:00.000Z'
+        city:
+          type: string
+          enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+          example: 'Paris'
+        type:
+          type: string
+          enum: [apartment, house, room, hotel]
+          example: 'apartment'
+        price:
+          type: integer
+          example: 5000
+        isFavorite:
+          type: boolean
+          example: true
+        imagePreview:
+          type: string
+          example: 'https://example.com/preview.jpg'
+        isPremium:
+          type: boolean
+          example: true
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          example: 4.5
+        commentsCount:
+          type: integer
+          example: 12
+
+    UserFavoriteOffers:
+      type: array
+      items:
+        $ref: '#/components/schemas/UserFavoriteOffer'
 
     Comments:
       type: array
       items:
-        $ref: '#/components/schemas/Comment'
+        $ref: '#/components/schemas/CommentRdo'
 
     NotFound:
       type: object
@@ -414,10 +881,10 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/NotFound'
-    Created:
-      description: Created
+    UserResponse:
+      description: Response with user
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/User'
+            $ref: '#/components/schemas/UserResponse'
 

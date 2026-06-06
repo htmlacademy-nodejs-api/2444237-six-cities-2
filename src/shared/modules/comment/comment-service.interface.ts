@@ -2,7 +2,7 @@ import { CommentEntity } from './comment.entity.js';
 import { CommentDto } from './dto/comment-dto.js';
 
 export interface CommentServiceInterface {
-  createComment(dto: CommentDto): Promise<CommentEntity>
-  findByOfferId(offerId: string): Promise<CommentEntity[]>
-  deleteByOfferId(offerId: string): Promise<number>
+  create(dto: CommentDto, offerId: string): Promise<CommentEntity>;
+  findById(offerId: string): Promise<CommentEntity[]>;
+  deleteById(offerId: string): Promise<number>;
 }

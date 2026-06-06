@@ -20,7 +20,7 @@ export class CommentController extends BaseController {
     super(logger);
 
     this.addRoute({
-      path: '/',
+      path: '/:offerId',
       method: HttpMethod.Post,
       handler: this.create,
       middlewares: [
@@ -31,7 +31,12 @@ export class CommentController extends BaseController {
   }
 
   public async create(req: Request, res: Response) {
-    const result = await this.commentService.createComment(req.body);
+    const { offerId } = req.params;
+
+    const result = await this.commentService.create(
+      req.body,
+      offerId as string,
+    );
     this.logger.info(`Comment created: ${req.body.text}`);
 
     this.created(res, fillDTO(CommentRDO, result));
