@@ -68,7 +68,12 @@ export class OfferService implements OfferServiceInterface, DocumentExists {
   }
 
   async find(limit: number): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel.find().populate('host').limit(limit).exec();
+    return this.offerModel
+      .find()
+      .populate('host')
+      .sort({ date: -1 })
+      .limit(limit)
+      .exec();
   }
 
   async findPremiumOffersByCity(
