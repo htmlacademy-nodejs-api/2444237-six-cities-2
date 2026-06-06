@@ -28,7 +28,14 @@ paths:
         '201':
           $ref: '#/components/responses/UserResponse'
 
-        '422':
+        '409':
+          description: Пользователь с таким email уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '400':
           description: Некорректные данные
           content:
             application/json:
@@ -85,13 +92,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoggedUser'
+                $ref: '#/components/schemas/UserResponse'
         '401':
           description: Пользователь не авторизован
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /users/{userId}/favorite:
     get:
       summary: Получить список избранных предложений
@@ -132,13 +140,13 @@ paths:
                    type: string
                    format: binary
        responses:
-         '200':
+         '201':
            description: Аватар успешно загружен
            content:
              application/json:
                type: string
-               description: Имя файла
-               example: avatar.jpg
+               description: Путь к загруженному файлу
+               example: 'https://example.com/avatar.jpg'
          '500':
            description: Произошла ошибка на сервере
            content:
@@ -179,8 +187,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfferRdo'
-        '422':
+        '400':
           description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Произошла ошибка на сервере
           content:
             application/json:
               schema:
@@ -243,13 +257,13 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
          '404':
-          description: Ресурс не найден или доступ запрещён
+          description: Предложение не найдено
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFound'
 
-         '422':
+         '400':
           description: Некорректные данные
           content:
             application/json:
@@ -303,6 +317,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: Предложение не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '403':
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Произошла ошибка на сервере
           content:
@@ -324,6 +350,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+         '404':
+          description: Предложение не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '403':
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Произошла ошибка на сервере
           content:
@@ -348,12 +386,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Offers'
-        '404':
-          description: Предложения не найдены
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NotFound'
         '500':
           description: Произошла ошибка на сервере
           content:
@@ -377,6 +409,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comments'
+        '500':
+          description: Произошла ошибка на сервере
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /comments/{offerId}:
     post:
       summary: Добавление нового комментария
@@ -401,7 +440,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentRdo'
-        '422':
+        '400':
           description: Некорректные данные
           content:
             application/json:

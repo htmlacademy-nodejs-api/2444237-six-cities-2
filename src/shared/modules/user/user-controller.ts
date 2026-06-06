@@ -99,7 +99,12 @@ export class UserController extends BaseController {
     }
     const favorites = await this.userService.findFavorite(user.id);
 
-    this.ok(res, fillDTO(UserFavoriteOfferRDO, favorites));
+    const favoritesWithStatus = favorites.map((offer) => ({
+      ...offer.toObject(),
+      isFavorite: true,
+    }));
+
+    this.ok(res, fillDTO(UserFavoriteOfferRDO, favoritesWithStatus));
   }
 
   public async auth(req: Request, res: Response) {

@@ -122,7 +122,9 @@ export class OfferController extends BaseController {
       ...offer.toObject(),
       isFavorite: favoritesIds.includes(offer.id),
     }));
+
     const responseData = fillDTO(OfferRDO, offersWithStatus);
+
     this.ok(res, responseData);
   }
 
@@ -149,7 +151,15 @@ export class OfferController extends BaseController {
     const offer = await this.offerService.findById(
       req.params.offerId as string,
     );
-    this.ok(res, fillDTO(OfferRDO, offer));
+
+    let isFavorite = false;
+
+    if (req.tokenPayload) {
+      const user = await this.userService.findById(req.tokenPayload.id);
+      isFavorite =
+        user?.favorites.some((id) => id.toString() === offer?.id) ?? false;
+    }
+    this.ok(res, fillDTO(OfferRDO, { ...offer?.toObject(), isFavorite }));
   }
 
   public async update(req: Request, res: Response) {
@@ -229,7 +239,20 @@ export class OfferController extends BaseController {
       city as City,
     );
 
-    this.ok(res, fillDTO(OfferRDO, premiumOffers));
+    let favoritesIds: string[] = [];
+
+    if (req.tokenPayload) {
+      const user = await this.userService.findById(req.tokenPayload.id);
+      favoritesIds =
+        user?.favorites.map((offer) => offer.toString()) ?? ([] as string[]);
+    }
+
+    const offersWithStatus = premiumOffers.map((offer) => ({
+      ...offer.toObject(),
+      isFavorite: favoritesIds.includes(offer.id),
+    }));
+
+    this.ok(res, fillDTO(OfferRDO, offersWithStatus));
   }
 
   public async getComments(req: Request, res: Response) {

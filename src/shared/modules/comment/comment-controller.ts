@@ -32,6 +32,7 @@ export class CommentController extends BaseController {
 
   public async create(req: Request, res: Response) {
     const { offerId } = req.params;
+
     const result = await this.commentService.create(
       req.body,
       offerId as string,
