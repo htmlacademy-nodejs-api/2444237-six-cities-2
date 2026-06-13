@@ -5,6 +5,8 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
+servers: 
+  - url: http://localhost:3000 
 tags:
   - name: Users
     description: Пользователи
@@ -17,6 +19,8 @@ paths:
   /users/register:
     post:
       summary: Создать пользователя
+      operationId: createUser
+      security: []
       tags: [Users]
       requestBody:
         content:
@@ -26,6 +30,7 @@ paths:
         required: true
       responses:
         '201':
+          description: Пользователь успешно создан
           $ref: '#/components/responses/UserResponse'
 
         '409':
@@ -33,7 +38,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ComflictError'
 
         '400':
           description: Некорректные данные
@@ -47,11 +52,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ServerError'
 
   /users/login:
     post:
       summary: Авторизация пользователя
+      operationId: loginUser
+      security: []
       tags: [Users]
       requestBody:
         content:
@@ -79,10 +86,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ServerError'
 
     get:
       summary: Получить информацию о текущем пользователе
+      operationId: getCurrentUser
       tags: [Users]
       security:
         - bearerAuth: []
@@ -98,17 +106,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/UnauthorizedError'
+        '500':
+          description: Произошла ошибка на сервере
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
 
   /users/{userId}/favorite:
     get:
       summary: Получить список избранных предложений
+      operationId: getUserFavoriteOffers
       parameters:
         - in: path
           name: userId
           required: true
+          schema:
+            type: string
+            example: '5f9b2e6c7b7b7b7b7b7b7b7b'
       tags: [Users]
-      bearerAuth: []
+      security:  
+          - bearerAuth: []
       responses:
         '200':
           description: Предложения успешно получены
@@ -121,32 +140,39 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/UnauthorizedError'
         '404':
           description: Пользователь не найден
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/NotFoundError'
         '403':
           description: Пользователь не является владельцем списка избранного
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ForbiddenError'
         '500':
           description: Произошла ошибка на сервере
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ServerError'
+
   /users/{userId}/avatar:
      post:
        summary: Загрузка аватара
+       operationId: uploadAvatar
+       security: 
+        -  bearerAuth: []
        parameters:
-         - in: path
-           name: userId
-           required: true
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: '5f9b2e6c7b7b7b7b7b7b7b7b'
        tags: [Users]
        requestBody:
          content:
@@ -161,19 +187,32 @@ paths:
            description: Аватар успешно загружен
            content:
              application/json:
-               type: string
-               description: Путь к загруженному файлу
-               example: 'https://example.com/avatar.jpg'
+               schema:
+                 $ref: '#/components/schemas/UserResponse'
+         '401':
+           description: Пользователь не авторизован
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/UnauthorizedError'
          '500':
            description: Произошла ошибка на сервере
            content:
              application/json:
                schema:
-                 $ref: '#/components/schemas/ErrorResponse'
+                 $ref: '#/components/schemas/ServerError'
+         '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
 
   /offers:
     get:
       summary: Получить список предложений
+      operationId: getOffers
+      security: []
       tags: [Offers]
       responses:
         '200':
@@ -187,10 +226,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ServerError'
     post:
       summary: Добавление нового предложения
-      bearerAuth: []
+      operationId: createOffer
+      security: 
+        -  bearerAuth: []
       tags: [Offers]
       requestBody:
         content:
@@ -199,7 +240,7 @@ paths:
              $ref: '#/components/schemas/CreateOffer'
       responses:
         '201':
-          description: Заказ успешно добавлен
+          description: Предложение успешно создано
           content:
             application/json:
               schema:
@@ -215,16 +256,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ServerError'
 
   /offers/{offerId}:
     get:
       summary: Получение предложения
+      operationId: getOffer
+      security: []
       tags: [Offers]
       parameters:
         - in: path
           name: offerId
           required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Предложение успешно получено
@@ -232,28 +277,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfferRdo'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '404':
           description: Предложение не найдено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Произошла ошибка на сервере
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ServerError'
     put:
       summary: Редактирование предложения
+      operationId: updateOffer
       tags: [Offers]
-      bearerAuth: []
+      security: 
+        -  bearerAuth: []
       parameters:
         - in: path
           name: offerId
           required: true
           schema:
             type: string
+            example: '5f9b2e6c7b7b7b7b7b7b7b7b'
       requestBody:
         content:
           application/json:
@@ -278,7 +332,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/NotFoundError'
 
          '400':
           description: Некорректные данные
@@ -292,10 +346,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ServerError'
     delete:
       summary: Удаление предложения
-      bearerAuth: []
+      operationId: deleteOffer
+      security: 
+        -  bearerAuth: []
       tags: [Offers]
       parameters:
         - in: path
@@ -306,27 +362,44 @@ paths:
       responses:
         '204':
           description: Предложение успешно удалено
-        '404':
-          description: Ресурс не найден или доступ запрещён
+        '400':
+          description: Некорректные данные
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/InvalidIdError'
+        '403':
+          description: Пользователь не является владельцем предложения
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '404':
+          description: Предложение не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Произошла ошибка на сервере
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /offers/{offerId}/favorite
+                $ref: '#/components/schemas/ServerError'
+
+  /offers/{offerId}/favorite:
     post:
       summary: Добавление предложения в избранное
-      bearerAuth: []
+      operationId: addFavorite
+      security: 
+        -  bearerAuth: []
       parameters:
         - in: path
           name: offerId
           required: true
-      tags: [Users]
+          schema:
+            type: string
+      tags: [Offers]
       responses:
         '200':
           description: Предложение успешно добавлено в избранное
@@ -334,32 +407,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '404':
           description: Предложение не найдено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/NotFoundError'
         '401':
           description: Пользователь не авторизован
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/UnauthorizedError'
         '500':
           description: Произошла ошибка на сервере
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ServerError'
     delete:
       summary: Удаление предложения из избранного
-      bearerAuth: []
+      operationId: deleteFavorite
+      security: 
+        -  bearerAuth: []
       parameters:
         - in: path
           name: offerId
           required: true
-      tags: [Users]
+          schema:
+            type: string
+      tags: [Offers]
       responses:
         '200':
           description: Предложение успешно удалено из избранного
@@ -367,28 +450,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-         '404':
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
           description: Предложение не найдено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/NotFoundError'
         '401':
           description: Пользователь не авторизован
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/UnauthorizedError'
         '500':
           description: Произошла ошибка на сервере
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'  
+                $ref: '#/components/schemas/ServerError'  
 
   /offers/premium/{city}:
     get:
       summary: Получить список премиум предложений
+      operationId: getPremiumOffers
+      security: []
       tags: [Offers]
       parameters:
         - in: path
@@ -408,10 +499,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /offers/{offerId}/comments/:
+                $ref: '#/components/schemas/ServerError'
+  /offers/{offerId}/comments:
     get:
       summary: Получить список комментариев
+      operationId: getComments
+      security: []
       tags: [Comments]
       parameters:
         - in: path
@@ -426,24 +519,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comments'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '500':
           description: Произошла ошибка на сервере
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /comments/{offerId}:
+                $ref: '#/components/schemas/ServerError'
     post:
       summary: Добавление нового комментария
-      tags: [Comments]
-      parameters:
+      operationId: createComment
+      parameters: 
         - in: path
           name: offerId
+          required: true
           schema:
             type: string
-            example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
-          required: true
+      security: 
+        -  bearerAuth: []
+      tags: [Comments]
       requestBody:
         content:
           application/json:
@@ -468,7 +567,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ServerError'
 components:
   securitySchemes:
     bearerAuth:
@@ -482,7 +581,54 @@ components:
       properties:
         error:
           type: string
-          example: 'offer with id 507f1f77bcf86cd799439011 not found'
+          example: 'invalid id'
+  
+    ServerError:
+      type: object
+      required: [error]
+      properties: 
+        error:
+          type: string
+          example: 'Server error'
+    
+    NotFoundError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: 'Not found'
+
+    UnauthorizedError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: 'Unauthorized'
+    ForbiddenError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: 'Access denied'
+
+    InvalidIdError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: 'invalid id'
+    ComflictError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: 'User already exists'
+        
     ValidationErrorItem:
       type: object
       properties:
@@ -777,6 +923,9 @@ components:
     OfferRdo:
       type: object
       properties:
+        _id:
+          type: string
+          example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
         title:
           type: string
           example: 'Apartment in the center of the city'
@@ -796,9 +945,10 @@ components:
           example: 'https://example.com/preview.jpg'
         images:
           type: array
+          minLength: 6
           items:
             type: string
-            example: 'https://example.com/image.jpg'
+            example: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg', 'https://example.com/image3.jpg', 'https://example.com/image4.jpg', 'https://example.com/image5.jpg', 'https://example.com/image6.jpg']
         isPremium:
           type: boolean
           example: true
@@ -814,12 +964,33 @@ components:
           type: string
           enum: [apartment, house, room, hotel]
           example: 'apartment'
+        bedrooms:
+          type: integer
+          example: 2
+        maxAdults:
+          type: integer
+          example: 4
         price:
           type: integer
           example: 5000
+        goods:
+          type: array
+          items:
+            type: string
+            enum: [Breakfast, Air conditioning, Laptop friendly workspace, Baby seat, Washer, Towels, Fridge]
+          example: ['Breakfast', 'Air conditioning']
+        host:
+          type: string
+          example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
         commentsCount:
           type: integer
           example: 12
+        location:
+          $ref: '#/components/schemas/Location'
+          example: {
+            lat: 50.4501,
+            lng: 30.5234
+          }
 
     Offers:
       type: array
@@ -851,18 +1022,18 @@ components:
         text:
           type: string
           example: 'Comment text'
-        author:
+        date:
           type: string
-          example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
+          format: date-time
+          example: '2022-01-01T00:00:00.000Z'
         rating:
           type: number
           minimum: 1
           maximum: 5
           example: 5
-        date:
+        author:
           type: string
-          format: date-time
-          example: '2022-01-01T00:00:00.000Z'
+          example: '6dcfd4433f8d3f6d4f3d4f3d4f3d4f3d'
 
     UserFavoriteOffer:
       type: object

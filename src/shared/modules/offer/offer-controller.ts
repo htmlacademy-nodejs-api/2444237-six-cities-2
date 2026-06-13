@@ -70,14 +70,14 @@ export class OfferController extends BaseController {
       ],
     });
     this.addRoute({
-      path: '/premium/:city',
+      path: '/premium',
       method: HttpMethod.Get,
-      handler: this.showPremiumOffers,
+      handler: this.showPremium,
     });
     this.addRoute({
       path: '/:offerId',
       method: HttpMethod.Get,
-      handler: this.getDetailOffers,
+      handler: this.getDetail,
       middlewares: [
         new ValidateObjectIdMiddleware('offerId'),
         new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
@@ -94,18 +94,47 @@ export class OfferController extends BaseController {
     });
 
     this.addRoute({
+      path: '/:offerId/comments',
+      method: HttpMethod.Post,
+      handler: this.createComment,
+      middlewares: [
+        new PrivateRouteMiddleware(),
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
+      ],
+    });
+
+    this.addRoute({
       path: '/:offerId/favorite',
       method: HttpMethod.Post,
-      handler: this.addFavoriteOffers,
-      middlewares: [new PrivateRouteMiddleware()],
+      handler: this.addFavorite,
+      middlewares: [
+        new PrivateRouteMiddleware(),
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
+      ],
     });
 
     this.addRoute({
       path: '/:offerId/favorite',
       method: HttpMethod.Delete,
-      handler: this.deleteFavoriteOffers,
-      middlewares: [new PrivateRouteMiddleware()],
+      handler: this.deleteFavorite,
+      middlewares: [
+        new PrivateRouteMiddleware(),
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware('offerId', 'offer', this.offerService),
+      ],
     });
+  }
+
+  public async createComment(req: Request, res: Response) {
+    const { offerId } = req.params;
+
+    const comment = await this.commentService.create(
+      { ...req.body, author: req.tokenPayload.id },
+      offerId as string,
+    );
+    this.created(res, fillDTO(CommentRDO, comment));
   }
 
   public async index(req: Request, res: Response) {
@@ -137,7 +166,7 @@ export class OfferController extends BaseController {
     this.created(res, fillDTO(OfferRDO, result));
   }
 
-  public async getDetailOffers(req: Request, res: Response) {
+  public async getDetail(req: Request, res: Response) {
     const offer = await this.offerService.findById(
       req.params.offerId as string,
     );
@@ -162,7 +191,7 @@ export class OfferController extends BaseController {
     this.ok(res, fillDTO(OfferRDO, updateOffer));
   }
 
-  public async addFavoriteOffers(req: Request, res: Response) {
+  public async addFavorite(req: Request, res: Response) {
     const { offerId } = req.params;
     const user = await this.userService.findById(req.tokenPayload.id);
     if (!user) {
@@ -184,7 +213,7 @@ export class OfferController extends BaseController {
     this.ok(res, fillDTO(UserRDO, response));
   }
 
-  async deleteFavoriteOffers(req: Request, res: Response) {
+  async deleteFavorite(req: Request, res: Response) {
     const { offerId } = req.params;
     const user = await this.userService.findById(req.tokenPayload.id);
     if (!user) {
@@ -209,6 +238,7 @@ export class OfferController extends BaseController {
 
   public async delete(req: Request, res: Response) {
     const { offerId } = req.params;
+
     const offer = await this.offerService.findById(offerId as string);
 
     if (!offer) {
@@ -217,15 +247,15 @@ export class OfferController extends BaseController {
 
       return this.logger.error(error.message, error);
     }
-    const result = await this.offerService.deleteById(offer.id);
+    await this.offerService.deleteById(offer.id);
     await this.commentService.deleteById(offer.id);
 
-    this.send(res, StatusCodes.NO_CONTENT, result);
+    this.noContent(res);
   }
 
-  public async showPremiumOffers(req: Request, res: Response) {
-    const { city } = req.params;
-    const premiumOffers = await this.offerService.findPremiumOffersByCity(
+  public async showPremium(req: Request, res: Response) {
+    const { city } = req.query;
+    const premiumOffers = await this.offerService.findPremiumByCity(
       city as City,
     );
 

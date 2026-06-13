@@ -4,13 +4,14 @@ import { OfferServiceInterface } from './offer-service.interface.js';
 import { OfferEntity } from './offer.entity.js';
 import { Component } from '../../types/container.js';
 import { Logger } from '../../libs/logger/index.js';
-import { City, UpdateOfferDto } from './dto/update-dto.js';
+import { UpdateOfferDto } from './dto/update-dto.js';
 import { DocumentType, mongoose, types } from '@typegoose/typegoose';
 import { CommentEntity } from '../comment/comment.entity.js';
 import { Types } from 'mongoose';
 import { DocumentExists } from '../../libs/rest/types/document-exists.interface.js';
 import { DISPLAY_PREMIUM_OFFERS_COUNT } from './offer.const.js';
 import { UserEntity } from '../user/index.js';
+import { City } from '../../types/offer.js';
 
 @injectable()
 export class OfferService implements OfferServiceInterface, DocumentExists {
@@ -68,17 +69,10 @@ export class OfferService implements OfferServiceInterface, DocumentExists {
   }
 
   async find(limit: number): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel
-      .find()
-      .populate('host')
-      .sort({ date: -1 })
-      .limit(limit)
-      .exec();
+    return this.offerModel.find().sort({ date: -1 }).limit(limit).exec();
   }
 
-  async findPremiumOffersByCity(
-    city: City,
-  ): Promise<DocumentType<OfferEntity>[]> {
+  async findPremiumByCity(city: City): Promise<DocumentType<OfferEntity>[]> {
     return this.offerModel
       .find({ city, isPremium: true })
       .sort({ date: -1 })

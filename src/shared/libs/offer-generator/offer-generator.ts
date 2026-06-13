@@ -1,9 +1,6 @@
-import {
-  generateRandomValue,
-  getRandomItem,
-  getRandomItems,
-} from '../../helpers/common.js';
+import { generateRandomValue, getRandomItem } from '../../helpers/common.js';
 import { MockServerData } from '../../types/mock-server.js';
+import { CITY_COORDINATES, CityCoordinates } from '../../types/offer.js';
 import { OfferGenerator } from './offer-generator.interface.js';
 
 const MAX_PRICE = 100000;
@@ -25,7 +22,7 @@ export class TSVOfferGenerator implements OfferGenerator {
     const postDate = getRandomItem<string>(this.mockData.postDate);
     const city = getRandomItem<string>(this.mockData.city);
     const previewImage = getRandomItem<string>(this.mockData.previewImage);
-    const images = getRandomItems<string>(this.mockData.images);
+    const images = getRandomItem<string>(this.mockData.images);
     const isPremium = getRandomItem<boolean>(this.mockData.isPremium);
     const isFavorite = getRandomItem<boolean>(this.mockData.isFavorite);
     const rating = getRandomItem<number>(this.mockData.rating);
@@ -33,15 +30,16 @@ export class TSVOfferGenerator implements OfferGenerator {
     const bedrooms = generateRandomValue(MIN_BEDROOMS, MAX_BEDROOMS);
     const maxAdults = generateRandomValue(MIN_ADULTS, MAX_ADULTS);
     const price = generateRandomValue(MIN_PRICE, MAX_PRICE);
-    const goods = getRandomItems<string>(this.mockData.goods);
+    const goods = getRandomItem<string>(this.mockData.goods);
     const hostId = getRandomItem<number>(this.mockData.hostId);
     const hostName = getRandomItem<string>(this.mockData.hostName);
     const hostEmail = getRandomItem<string>(this.mockData.hostEmail);
     const hostAvatar = getRandomItem<string>(this.mockData.hostAvatar);
     const hostPassword = getRandomItem<string>(this.mockData.hostPassword);
     const hostIsPro = getRandomItem<boolean>(this.mockData.hostIsPro);
-    const locationLat = getRandomItem<number>(this.mockData.locationLat);
-    const locationLng = getRandomItem<number>(this.mockData.locationLng);
+    const coordies = (CITY_COORDINATES as CityCoordinates)[city];
+    const locationLat = coordies.lat;
+    const locationLng = coordies.lng;
     const commentsCount = getRandomItem<number>(this.mockData.commentsCount);
 
     return [
@@ -51,7 +49,7 @@ export class TSVOfferGenerator implements OfferGenerator {
       postDate,
       city,
       previewImage,
-      images.join('|'),
+      images,
       isPremium,
       isFavorite,
       rating,
@@ -59,7 +57,7 @@ export class TSVOfferGenerator implements OfferGenerator {
       bedrooms,
       maxAdults,
       price,
-      goods.join('|'),
+      goods,
       hostId,
       hostName,
       hostEmail,

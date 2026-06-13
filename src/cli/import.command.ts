@@ -1,7 +1,7 @@
 import { ModelType } from '@typegoose/typegoose/lib/types.js';
 import { getErrorMessage } from '../shared/helpers/common.js';
 import { getMongoUri } from '../shared/helpers/database-client.js';
-import { createOffer } from '../shared/helpers/offer.js';
+import { create } from '../shared/helpers/offer.js';
 import {
   DatabaseClient,
   MongoDatabaseClient,
@@ -38,7 +38,7 @@ export class ImportCommand implements Command {
     this.databaseClient = new MongoDatabaseClient(this.logger);
   }
 
-  public getName(): string {
+  getName(): string {
     return '--import';
   }
 
@@ -57,8 +57,8 @@ export class ImportCommand implements Command {
   }
 
   private async onImportedLine(line: string, resolve: () => void) {
-    const offer = createOffer(line);
-    await this.saveOffer(offer);
+    const offer = create(line);
+    await this.save(offer);
     resolve();
   }
 
@@ -66,8 +66,8 @@ export class ImportCommand implements Command {
     this.databaseClient.disconnect();
   }
 
-  private async saveOffer(offer: Offer) {
-    const { id: _id, host, ...offerData } = offer;
+  private async save(offer: Offer) {
+    const { host, ...offerData } = offer;
     const user = await this.userService.register(
       { ...host, password: DEFAULT_USER_PASSWORD },
       this.salt,

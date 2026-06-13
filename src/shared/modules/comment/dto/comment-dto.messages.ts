@@ -1,5 +1,6 @@
 export const CommentDTOValidationMessage = {
   text: {
+    isString: 'Comment text must be a string',
     min: 'Comment text must be at least 5 characters long',
     max: 'Comment text must be at most 1024 characters long',
   },
