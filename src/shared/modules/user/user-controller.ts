@@ -19,6 +19,7 @@ import { CreateUserDto, LoginUserDTO } from './dto/user-dto.js';
 import { AuthServiceInterface, UserNotFoundException } from '../auth/index.js';
 import { PrivateRouteMiddleware } from '../../libs/rest/middleware/private-route.middleware.js';
 import { UploadFileMiddleware } from '../../libs/rest/middleware/upload-file.middleware.js';
+import { ValidateObjectIdMiddleware } from '../../libs/rest/middleware/validate-objectid.middleware.js';
 
 export class UserController extends BaseController {
   constructor(
@@ -48,7 +49,10 @@ export class UserController extends BaseController {
       path: '/:userId/favorite',
       method: HttpMethod.Get,
       handler: this.getFavorites,
-      middlewares: [new PrivateRouteMiddleware()],
+      middlewares: [
+        new PrivateRouteMiddleware(),
+        new ValidateObjectIdMiddleware('userId'),
+      ],
     });
 
     this.addRoute({
@@ -60,6 +64,8 @@ export class UserController extends BaseController {
           this.config.get('UPLOAD_FILE_DIRECTORY'),
           'avatar',
         ),
+        new PrivateRouteMiddleware(),
+        new ValidateObjectIdMiddleware('userId'),
       ],
     });
 

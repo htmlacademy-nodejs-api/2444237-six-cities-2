@@ -135,6 +135,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserFavoriteOffers'
+        '400':
+          description:  Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '401':
           description: Пользователь не авторизован
           content:
@@ -475,18 +481,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/ServerError'  
 
-  /offers/premium/{city}:
+  /offers/premium:
     get:
       summary: Получить список премиум предложений
       operationId: getPremiumOffers
       security: []
       tags: [Offers]
       parameters:
-        - in: path
-          name: city
+        - name: city
+          in: query
           required: true
           schema:
             type: string
+            example: 'Paris'
       responses:
         '200':
           description: Предложения успешно получены
