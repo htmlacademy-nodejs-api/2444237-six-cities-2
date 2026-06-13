@@ -25,8 +25,6 @@ export class RestApplication {
     private readonly userController: Controller,
     @inject(Component.ExceptionFilter)
     private readonly exceptionFilter: ExceptionFilter,
-    @inject(Component.CommentController)
-    private readonly commentController: Controller,
     @inject(Component.AuthExceptionFilter)
     private readonly authExceptionFilter: ExceptionFilter,
   ) {
@@ -77,7 +75,6 @@ export class RestApplication {
   private async _initControllers() {
     this.server.use('/offers', this.offerController.router);
     this.server.use('/users', this.userController.router);
-    this.server.use('/comments', this.commentController.router);
   }
 
   private async _initServer() {
@@ -105,12 +102,12 @@ export class RestApplication {
 
     await this.__initExceptionFilters();
 
-    this.logger.info(
-      `🚀 Server started on ${getFullServerPath(this.config.get('HOST'), this.config.get('PORT'))}`,
-    );
-
     this.logger.info('Database initialization');
     await this._initDB();
+
+    this.logger.info(
+      `Server started on ${getFullServerPath(this.config.get('HOST'), this.config.get('PORT'))}`,
+    );
     this.logger.info('Init database completed');
   }
 }

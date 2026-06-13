@@ -4,8 +4,6 @@ import { Component } from '../../types/container.js';
 import { types } from '@typegoose/typegoose';
 import { CommentServiceInterface } from './comment-service.interface.js';
 import { CommentService } from './comment-service.js';
-import { Controller } from '../../libs/rest/controller/controller.interface.js';
-import { CommentController } from './comment-controller.js';
 
 export function createCommentContainer() {
   const commentContainer = new Container();
@@ -17,10 +15,6 @@ export function createCommentContainer() {
   commentContainer
     .bind<types.ModelType<CommentEntity>>(Component.CommentModel)
     .toConstantValue(CommentModel);
-  commentContainer
-    .bind<Controller>(Component.CommentController)
-    .to(CommentController)
-    .inSingletonScope();
 
   return commentContainer;
 }

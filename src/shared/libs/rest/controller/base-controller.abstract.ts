@@ -41,7 +41,7 @@ export abstract class BaseController implements Controller {
     );
   }
 
-  public send<T>(res: Response, statusCode: number, data: T) {
+  public send<T>(res: Response, statusCode: number, data?: T) {
     const modifiedData = this.pathTransformer.execute(
       data as Record<string, unknown>,
     );
@@ -52,11 +52,11 @@ export abstract class BaseController implements Controller {
     this.send(res, StatusCodes.CREATED, data);
   }
 
-  public ok<T>(res: Response, data: T) {
+  public ok<T>(res: Response, data?: T) {
     this.send(res, StatusCodes.OK, data);
   }
 
-  public noContent<T>(res: Response, data: T): void {
-    this.send(res, StatusCodes.NO_CONTENT, data);
+  public noContent(res: Response): void {
+    this.send(res, StatusCodes.NO_CONTENT);
   }
 }

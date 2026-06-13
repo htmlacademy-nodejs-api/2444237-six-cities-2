@@ -1,8 +1,9 @@
 import { DocumentType } from '@typegoose/typegoose';
 import { CreateOfferDto } from './dto/offer-dto.js';
 import { OfferEntity } from './offer.entity.js';
-import { City, UpdateOfferDto } from './dto/update-dto.js';
+import { UpdateOfferDto } from './dto/update-dto.js';
 import { UserEntity } from '../user/index.js';
+import { City } from '../../types/offer.js';
 
 export interface OfferServiceInterface {
   create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>>;
@@ -15,7 +16,7 @@ export interface OfferServiceInterface {
   deleteById(offerId: string): Promise<DocumentType<OfferEntity> | null>;
   incCommentCount(offerId: string): Promise<DocumentType<OfferEntity> | null>;
   decCommentCount(offerId: string): Promise<DocumentType<OfferEntity> | null>;
-  findPremiumOffersByCity(city: City): Promise<DocumentType<OfferEntity>[]>;
+  findPremiumByCity(city: City): Promise<DocumentType<OfferEntity>[]>;
   deleteFavorite(
     offerId: string,
     userId: string,

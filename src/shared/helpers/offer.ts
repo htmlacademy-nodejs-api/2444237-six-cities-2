@@ -1,6 +1,6 @@
 import { Amenity, City, HousingType, Offer } from '../types/offer.js';
 
-export const createOffer = (offerData: string): Offer => {
+export const create = (offerData: string): Offer => {
   const [
     id,
     title,

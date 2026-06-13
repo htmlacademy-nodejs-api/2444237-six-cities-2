@@ -1,6 +1,10 @@
 import { Expose } from 'class-transformer';
+import { Amenity } from '../../../types/offer.js';
 
 export class OfferRDO {
+  @Expose()
+    _id: string;
+
   @Expose()
     title: string;
 
@@ -32,8 +36,23 @@ export class OfferRDO {
     type: string;
 
   @Expose()
+    bedrooms: number;
+
+  @Expose()
+    maxAdults: number;
+
+  @Expose()
     price: number;
 
   @Expose()
+    goods: Amenity[];
+
+  @Expose()
+    host: string;
+
+  @Expose()
     commentsCount: number;
+
+  @Expose()
+    location: { latitude: number; longitude: number };
 }

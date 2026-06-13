@@ -1,7 +1,15 @@
-import { IsDateString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import {
+  IsDateString,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { CommentDTOValidationMessage } from './comment-dto.messages.js';
 
 export class CommentDto {
+  @IsString({ message: CommentDTOValidationMessage.text.isString })
   @MinLength(5, { message: CommentDTOValidationMessage.text.min })
   @MaxLength(1024, { message: CommentDTOValidationMessage.text.max })
     text!: string;

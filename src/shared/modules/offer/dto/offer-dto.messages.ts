@@ -58,6 +58,7 @@ export const OfferDTOValidationMessage = {
 
   goods: {
     isArray: 'Goods must be an array.',
+    isEnum: 'Goods must be an array.',
   },
 
   host: {

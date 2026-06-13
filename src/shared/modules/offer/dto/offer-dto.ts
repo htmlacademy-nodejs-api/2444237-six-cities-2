@@ -1,4 +1,11 @@
-import { Amenity, City, HousingType } from '../../../types/offer.js';
+import {
+  Amenities,
+  Amenity,
+  CITIES,
+  City,
+  HousingType,
+  HousingTypes,
+} from '../../../types/offer.js';
 import {
   IsArray,
   IsBoolean,
@@ -30,10 +37,7 @@ export class CreateOfferDto {
   @IsDateString({}, { message: OfferDTOValidationMessage.date.isDate })
     date!: Date;
 
-  @IsEnum(
-    ['Paris', 'Cologne', 'Brussels', 'Amsterdam', 'Hamburg', 'Dusseldorf'],
-    { message: OfferDTOValidationMessage.city.isEnum },
-  )
+  @IsEnum(CITIES, { message: OfferDTOValidationMessage.city.isEnum })
     city!: City;
 
   @IsString({ message: OfferDTOValidationMessage.imagePreview.isString })
@@ -52,7 +56,7 @@ export class CreateOfferDto {
   @Max(5, { message: OfferDTOValidationMessage.rating.max })
     rating!: number;
 
-  @IsEnum(['apartment', 'house', 'room', 'hotel'], {
+  @IsEnum(HousingTypes, {
     message: OfferDTOValidationMessage.type.isEnum,
   })
     type!: HousingType;
@@ -70,6 +74,10 @@ export class CreateOfferDto {
     price!: number;
 
   @IsArray({ message: OfferDTOValidationMessage.goods.isArray })
+  @IsEnum(Amenities, {
+    each: true,
+    message: OfferDTOValidationMessage.goods.isEnum,
+  })
     goods!: Amenity[];
 
   @IsString({ message: OfferDTOValidationMessage.host.isMongoId })
